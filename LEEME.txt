@@ -1,0 +1,52 @@
+RIVA FOTO EDITOR PRO – CÓMO PUBLICARLA Y COBRARLA
+===================================================
+
+Esta carpeta es la app completa, preparada como "app instalable" (PWA):
+funciona sin internet una vez abierta, tiene íconos y se puede instalar.
+
+PASO 1 – Subirla a internet con dirección propia (gratis)
+  1. Entrá a github.com con tu cuenta y creá un repositorio público
+     llamado, por ejemplo, riva-foto-pro.
+  2. Subí TODO el contenido de esta carpeta (incluida la carpeta oculta
+     ".well-known" y el archivo ".nojekyll").
+  3. En el repositorio: Settings > Pages > Source: "Deploy from a branch",
+     rama "main", carpeta "/ (root)". Guardá.
+  4. En un par de minutos queda en:
+     https://TU-USUARIO.github.io/riva-foto-pro/
+  (Más adelante podés usar un dominio propio, por ejemplo rivafoto.com.ar)
+
+PASO 2 – Convertirla en app de Android
+  1. Entrá a https://www.pwabuilder.com y pegá la dirección del paso 1.
+  2. Tocá "Package for stores" > Android > "Generate package".
+     Nombre del paquete sugerido: com.riva.fotopro
+  3. Descargás un ZIP con el archivo .aab (para Play Store) y la
+     "signing key" (llave de firma). GUARDÁ LA LLAVE Y SU CONTRASEÑA:
+     sin ella no vas a poder actualizar la app nunca más.
+  4. El ZIP también trae un archivo assetlinks.json. Reemplazá con él el
+     archivo .well-known/assetlinks.json de esta carpeta y volvé a subirlo
+     a GitHub (sirve para que la app abra sin barra del navegador).
+
+PASO 3 – Play Console y cobro
+  1. Creá la cuenta en https://play.google.com/console
+     (pago único de 25 USD, verificación de identidad).
+  2. En "Configuración > Perfil de pagos" creá el perfil de comerciante
+     (Argentina está habilitada; Google paga en dólares por transferencia,
+     el banco puede pedirte documentación al recibirlo).
+  3. Creá la app, elegí "De pago" y poné el precio.
+     (Ojo: una app gratuita no se puede pasar a paga después.)
+  4. Subí el .aab, íconos (carpeta icons), capturas de pantalla,
+     descripción y la política de privacidad (ver abajo).
+  5. Las cuentas personales nuevas tienen que hacer una prueba cerrada
+     con testers antes de publicar al público. Sumá familiares y clientes
+     como testers.
+
+POLÍTICA DE PRIVACIDAD (podés usar este texto en una página web)
+  "Riva Foto Editor Pro procesa las fotos únicamente en el dispositivo del
+   usuario. No sube fotos a ningún servidor, no recopila datos personales
+   ni usa publicidad. Contacto: (tu correo)."
+
+VENDERLA FUERA DE PLAY STORE
+  - Computadora: el archivo offline/RivaFotoPro.html funciona sin internet.
+    Se puede vender como descarga por Mercado Pago o Hotmart. Al ser un
+    archivo, quien lo compra podría copiarlo: conviene cobrar barato o
+    venderlo junto con tus servicios de fotografía.

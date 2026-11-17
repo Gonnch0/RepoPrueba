@@ -1,0 +1,41 @@
+{
+  "name": "Riva Foto Editor Pro",
+  "short_name": "Riva Foto",
+  "description": "Editor de fotos: mejora con un toque, estilos de color, fondo desenfocado, teleobjetivo, retoque de sonrisa, edición en lote e impresión en todos los tamaños.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#121212",
+  "theme_color": "#1e1e1e",
+  "categories": [
+    "photo",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "./"
+}

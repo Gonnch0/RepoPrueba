@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Riva Foto Editor Pro</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1e1e1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Riva Foto">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<!--FONTS-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<!--/FONTS-->
+<style>
+:root{
+  --bg:#121212; --panel:#1e1e1e; --panel2:#2a2a2a; --line:#333; --text:#e6e6e6; --mut:#8f8f8f;
+  --blue:#378ef0; --acc1:#378ef0; --acc2:#378ef0; --acc:#378ef0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;overflow:hidden;font-size:14px}
+button{font-family:inherit;color:inherit;cursor:pointer}
+#app{display:flex;flex-direction:column;height:100%;height:100dvh}
+header{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--panel)}
+.logo{font-weight:700;font-size:15px;letter-spacing:.2px;flex:1;white-space:nowrap;overflow:hidden}
+.logo b{color:var(--blue)}
+.hbtn{background:var(--panel2);border:1px solid var(--line);border-radius:10px;height:36px;min-width:36px;padding:0 10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px}
+.hbtn:disabled{opacity:.35}
+.hbtn.primary{background:var(--blue);border:none;color:#fff}
+#stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:0;background:#121212;padding:10px}
+#view{max-width:100%;max-height:100%;display:none;touch-action:none;box-shadow:0 6px 30px rgba(0,0,0,.6)}
+#empty{text-align:center;padding:24px;max-width:420px}
+#empty h1{font-size:22px;margin:0 0 6px}
+#empty p{color:var(--mut);margin:0 0 18px;line-height:1.45}
+.bigbtn{background:var(--blue);border:none;color:#fff;font-weight:600;font-size:15px;padding:13px 24px;border-radius:999px}
+#magic{position:absolute;right:12px;bottom:12px;display:none;background:rgba(30,30,30,.92);border:1px solid #444;color:#fff;font-weight:600;
+  padding:10px 16px;border-radius:999px;font-size:13.5px;z-index:3}
+#magic.on{background:var(--blue);border-color:var(--blue)}
+#beforeTag{position:absolute;right:12px;top:12px;background:rgba(0,0,0,.65);padding:4px 10px;border-radius:8px;font-weight:600;display:none;z-index:3}
+#toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:rgba(20,20,24,.92);border:1px solid var(--line);
+  padding:8px 14px;border-radius:10px;font-size:13px;display:none;z-index:5;max-width:90%;text-align:center}
+#hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(55,142,240,.95);color:#fff;
+  padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;display:none;z-index:4;max-width:80%;text-align:center}
+#busy{position:absolute;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:6}
+.spin{width:36px;height:36px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#panel{background:var(--panel);border-top:1px solid var(--line);height:205px;overflow-y:auto;overflow-x:hidden;padding:10px 12px}
+#panel.tall{height:265px}
+nav{display:flex;background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:none;padding:8px 0 9px;font-size:11px;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button svg{width:22px;height:22px}
+nav button.act{color:var(--blue)}
+nav button.act svg{stroke:var(--blue)}
+.sec{display:none}.sec.act{display:block}
+.strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.pre{flex:0 0 auto;width:78px;text-align:center;background:none;border:none;padding:0}
+.pre canvas{width:78px;height:78px;border-radius:4px;object-fit:cover;display:block;border:2px solid transparent;background:#222}
+.pre.act canvas{border-color:var(--acc2)}
+.pre span{display:block;font-size:11px;margin-top:4px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pre.act span{color:#fff;font-weight:600}
+.row{display:flex;align-items:center;gap:10px;margin:7px 0}
+.row label{width:96px;flex:0 0 96px;font-size:12.5px;color:#cfcfcf}
+.row .val{width:34px;text-align:right;font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums}
+.sl{display:block;margin:4px 0 8px}
+.sl .top{display:flex;justify-content:space-between;font-size:12.5px;color:#d0d0d0;user-select:none}
+.sl .top .val{color:#d0d0d0;font-variant-numeric:tabular-nums}
+.sl input{width:100%}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:26px;background:transparent;margin:0;--trk:#4a4a4a}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--trk);border-radius:2px}
+input[type=range]::-moz-range-track{height:2px;background:var(--trk);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#e8e8e8;margin-top:-7px;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#e8e8e8;border:none}
+.sec2{border-bottom:1px solid var(--line)}
+.sec2>summary{list-style:none;cursor:pointer;padding:11px 2px;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:8px;user-select:none}
+.sec2>summary::-webkit-details-marker{display:none}
+.sec2>summary::before{content:'▸';color:var(--mut);font-size:11px;transition:transform .15s}
+.sec2[open]>summary::before{transform:rotate(90deg)}
+.sec2>summary .sm{margin-left:auto;font-weight:500;color:var(--mut);font-size:11.5px}
+.sec2 .in{padding:0 2px 8px}
+#histo{position:absolute;left:12px;top:12px;width:132px;height:62px;background:rgba(20,20,20,.72);border:1px solid #333;border-radius:4px;z-index:3;display:none;cursor:pointer}
+.grp{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);margin:12px 0 2px;font-weight:600}
+.grp:first-child{margin-top:2px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.card{background:var(--panel2);border:1.5px solid var(--line);border-radius:6px;padding:9px 6px;text-align:center;font-size:12px;font-weight:600}
+.card i{display:block;font-style:normal;font-size:20px;margin-bottom:3px}
+.card.act{border-color:var(--blue);background:#1d2a3a}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{background:var(--panel2);border:1.5px solid var(--line);border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:600}
+.chip.act{border-color:var(--blue);background:#1d2a3a}
+.note{color:var(--mut);font-size:12px;line-height:1.4;margin:6px 0}
+.btnrow{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap}
+.btn{background:var(--panel2);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;font-weight:600;font-size:13px}
+.btn.primary{background:var(--blue);border:none;color:#fff}
+.swatch{width:30px;height:30px;border-radius:50%;border:2px solid var(--line)}
+.swatch.act{border-color:#fff;box-shadow:0 0 0 2px var(--acc2)}
+select.sel{width:100%;background:var(--panel2);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;color:#fff;font-family:inherit;font-size:14px}
+input[type=text]{width:100%;background:var(--panel2);border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;color:#fff;font-family:inherit;font-size:14px}
+
+.pick{position:relative;overflow:hidden}
+.pick input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:200px}
+#errbar{position:fixed;left:8px;right:8px;bottom:8px;background:#b3261e;color:#fff;padding:10px 12px;border-radius:10px;font-size:12px;z-index:99;display:none;white-space:pre-wrap;word-break:break-word}
+
+#batch{position:fixed;inset:0;background:var(--bg);z-index:30;display:none;flex-direction:column}
+#batch .bhead{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--panel);font-size:16px}
+#batch .bhead b{flex:1}
+#batch .bbody{flex:1;overflow-y:auto;padding:14px;max-width:720px;width:100%;margin:0 auto}
+#bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin:14px 0}
+#bgrid .bt{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#222}
+#bgrid .bt img{width:100%;height:100%;object-fit:cover;display:block}
+#bgrid .bt button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,.7);color:#fff;font-size:13px;line-height:24px;padding:0}
+#bgrid .bt.done::after{content:'✓';position:absolute;left:5px;bottom:4px;background:#1d9e75;color:#fff;border-radius:50%;width:20px;height:20px;font-size:12px;text-align:center;line-height:20px}
+#bsum{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:13px;line-height:1.55;color:#d6d9df}
+#bprog{height:8px;background:#2a2d33;border-radius:8px;overflow:hidden;margin:12px 0 6px;display:none}
+#bbar{height:100%;width:0;background:var(--acc);transition:width .2s}
+.switch{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:13.5px}
+.switch input{width:20px;height:20px;accent-color:#ff3d7f}
+
+.ib{background:none;border:none;color:#d8d8d8;width:38px;height:38px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0}
+.ib svg{width:22px;height:22px}
+.ib:disabled{opacity:.3}
+.ib:active{background:#2c2c2c}
+.ib.accent{color:#fff;width:auto;padding:0 10px;background:var(--blue)}
+.ib.accent .lbl{font-size:13px;font-weight:600}
+.ib.accent:disabled{opacity:.35}
+#fname{font-weight:400;color:var(--mut);font-size:12px;margin-left:6px}
+#menu{position:fixed;top:52px;right:8px;background:#262626;border:1px solid #3a3a3a;border-radius:10px;z-index:25;display:none;flex-direction:column;min-width:250px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+#menu button{background:none;border:none;text-align:left;padding:11px 12px;font-size:14px;border-radius:6px;color:#e6e6e6}
+#menu button:active,#menu button:hover{background:#333}
+#magic{display:none!important}
+nav{overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:0 0 66px;min-width:66px}
+nav button.on svg{stroke:var(--blue)} nav button.on{color:var(--blue)}
+.ptitle{display:flex;align-items:center;justify-content:space-between;margin:2px 0 6px}
+.ptitle b{font-size:14px}
+.autob{background:none;border:1.5px solid #555;color:#ddd;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600}
+.autob.on{border-color:var(--blue);color:#fff;background:var(--blue)}
+@media (max-width:520px){ .ib.accent .lbl{display:none} #fname{display:none} .logo{flex:1} }
+#printPrev{display:block;max-width:100%;max-height:150px;margin:6px auto;box-shadow:0 2px 12px rgba(0,0,0,.6);background:#fff}
+#saveModal{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:40;padding:16px;gap:12px}
+#saveModal img{max-width:100%;max-height:72vh;box-shadow:0 4px 30px #000}
+#saveModal p{text-align:center;color:#ddd;margin:0;line-height:1.4}
+.fxcard{position:relative}
+.fxcard .dot{position:absolute;top:6px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--acc2);display:none}
+.fxcard.on .dot{display:block}
+@media (max-width:520px){
+  .hbtn{padding:0 8px}
+  .logo{font-size:14px}
+  #toast{top:84px}
+}
+@media (min-width:900px){
+  #app{display:grid;grid-template-columns:1fr 330px 64px;grid-template-rows:auto 1fr}
+  header{grid-column:1/4}
+  #stage{grid-row:2;grid-column:1;padding:24px}
+  #panel,#panel.tall{height:auto;grid-column:2;grid-row:2;border-left:1px solid var(--line);border-top:none;padding:6px 16px}
+  nav{grid-column:3;grid-row:2;flex-direction:column;justify-content:flex-start;border-left:1px solid var(--line);border-top:none;padding-top:8px}
+  nav button{flex:0 0 auto;padding:12px 0}
+  .bt-wide{display:inline-flex}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8a3d"/><stop offset="1" stop-color="#ff3d7f"/></linearGradient></defs></svg>
+<div id="app">
+  <header>
+    <div class="logo">Riva <b>Pro</b> <span id="fname"></span></div>
+    <span class="ib pick" id="bOpen" title="Abrir fotos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v6M9 13h6"/></svg><input type="file" class="filein" accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.bmp,.avif,.heic,.heif,.hif,.jxl,.tif,.tiff,.svg,.ico,.psd,.dng,.cr2,.cr3,.crw,.nef,.nrw,.arw,.srf,.sr2,.raf,.orf,.rw2,.rwl,.pef,.ptx,.srw,.x3f,.3fr,.erf,.kdc,.dcr,.mrw,.mos,.mef,.iiq,.raw,.gpr,.fff" multiple></span>
+    <button class="ib" id="bUndo" title="Deshacer" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+    <button class="ib" id="bRedo" title="Rehacer" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+    <button class="ib" id="bBefore" title="Mantener apretado para ver el antes" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/><path d="M12 4l9 16" opacity=".0"/><path d="M3 20l9-9" opacity=".5"/></svg></button>
+    <button class="ib" id="bMenu" title="Más opciones"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></button>
+    <button class="ib accent" id="bSave" title="Exportar foto" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span class="lbl">Exportar</span></button>
+  </header>
+  <div id="menu">
+    <button id="bBatch">🗂️ Edición en lote</button>
+    <button id="mPrint">🖨️ Imprimir</button>
+    <button id="mHisto">📊 Mostrar u ocultar histograma</button>
+    <button id="mReset">↺ Restablecer toda la edición</button>
+    <button id="bPC">💻 Descargar para la compu (sin internet)</button>
+    <div style="padding:8px 12px 4px;font-size:11px;color:#777">Riva Foto Pro · versión 3 (estilo Lightroom)</div>
+  </div>
+  <div id="stage">
+    <div id="empty">
+      <h1>Editá tus fotos como un profesional</h1>
+      <p>Mejora con un toque, colores de cine, fondo desenfocado con la persona nítida, efecto teleobjetivo, retoque de sonrisa e impresión lista.</p>
+      <span class="bigbtn pick" id="bOpen2" style="display:inline-block">📷 Elegir una foto<input type="file" class="filein" accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.bmp,.avif,.heic,.heif,.hif,.jxl,.tif,.tiff,.svg,.ico,.psd,.dng,.cr2,.cr3,.crw,.nef,.nrw,.arw,.srf,.sr2,.raf,.orf,.rw2,.rwl,.pef,.ptx,.srw,.x3f,.3fr,.erf,.kdc,.dcr,.mrw,.mos,.mef,.iiq,.raw,.gpr,.fff" multiple></span>
+      <p><button class="btn" id="bPC2" style="margin-top:4px">💻 Descargar para la compu (sin internet)</button></p>
+      <p style="margin-top:14px;font-size:12px">Las fotos se procesan en tu teléfono, no se suben a ningún lado.</p>
+    </div>
+    <canvas id="view"></canvas>
+    <button id="magic">✨ Auto</button>
+    <canvas id="histo" width="264" height="124" title="Histograma (tocá para ocultar)"></canvas>
+    <div id="beforeTag">ANTES</div>
+    <div id="toast"></div>
+    <div id="hint"></div>
+    <div id="busy"><div class="spin"></div></div>
+  </div>
+  <div id="panel"></div>
+  <nav id="nav"></nav>
+</div>
+<div id="errbar"></div>
+<div id="batch">
+  <div class="bhead"><b>🗂️ Edición en lote</b><button class="hbtn" id="bClose">✕ Cerrar</button></div>
+  <div class="bbody">
+    <p class="note" style="font-size:13px">Elegí varias fotos y se les aplica a todas la misma edición que armaste: estilo de color, ajustes, efectos y fondo. Después las descargás juntas o las imprimís en un solo PDF.</p>
+    <span class="bigbtn pick" style="display:inline-block">➕ Agregar fotos<input type="file" id="bfiles" accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.bmp,.avif,.heic,.heif,.hif,.jxl,.tif,.tiff,.svg,.ico,.psd,.dng,.cr2,.cr3,.crw,.nef,.nrw,.arw,.srf,.sr2,.raf,.orf,.rw2,.rwl,.pef,.ptx,.srw,.x3f,.3fr,.erf,.kdc,.dcr,.mrw,.mos,.mef,.iiq,.raw,.gpr,.fff" multiple></span>
+    <div id="bgrid"></div>
+    <div id="bsum"></div>
+    <div class="grp">Edición a aplicar</div><div class="chips" id="bRecs"></div>
+    <label class="switch"><input type="checkbox" id="bEnh" checked> ✨ Mejorar cada foto automáticamente (luz y color propios de cada una)</label>
+    <div class="btnrow"><button class="btn primary" id="bZip">⬇ Descargar todas (ZIP)</button><button class="btn" id="bPdf">🖨️ PDF para imprimir</button><button class="btn" id="bClear">Vaciar</button></div>
+    <div id="bprog"><div id="bbar"></div></div>
+    <p class="note" id="bstat"></p>
+  </div>
+</div>
+<div id="saveModal">
+  <img id="saveImg" alt="Foto lista">
+  <p id="saveTxt">Mantené apretada la imagen y elegí <b>Guardar imagen</b>.</p>
+  <button class="btn" id="saveClose">Cerrar</button>
+</div>
+
+<script>
+window.onerror=function(m,src,l,c){var b=document.getElementById('errbar');if(b){b.style.display='block';b.textContent='Error: '+m+' (línea '+l+')';}};
+window.addEventListener('unhandledrejection',function(e){var b=document.getElementById('errbar');if(b){b.style.display='block';b.textContent='Error: '+((e.reason&&e.reason.message)||e.reason);}});
+</script>
+<script>
+'use strict';
+/* =========================================================
+   Riva Foto Editor Pro — motor de edición
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+const PREVIEW_MAX = 1080, FAST_MAX = 600, EXPORT_MAX = 2600;
+
+/* ---------- Blur y filtros base (Float32, un canal) ---------- */
+function boxH(src, dst, w, h, r) {
+  const inv = 1 / (2 * r + 1);
+  for (let y = 0; y < h; y++) {
+    const row = y * w, first = src[row];
+    let acc = r * first;
+    for (let x = 0; x < r; x++) acc += src[row + (x < w ? x : w - 1)];
+    for (let x = 0; x < w; x++) {
+      const xr = x + r;
+      acc += src[row + (xr < w ? xr : w - 1)];
+      dst[row + x] = acc * inv;
+      const xl = x - r;
+      acc -= src[row + (xl > 0 ? xl : 0)];
+    }
+  }
+}
+function boxV(src, dst, w, h, r) {
+  const inv = 1 / (2 * r + 1);
+  for (let x = 0; x < w; x++) {
+    const first = src[x];
+    let acc = r * first;
+    for (let y = 0; y < r; y++) acc += src[(y < h ? y : h - 1) * w + x];
+    for (let y = 0; y < h; y++) {
+      const yr = y + r;
+      acc += src[(yr < h ? yr : h - 1) * w + x];
+      dst[y * w + x] = acc * inv;
+      const yl = y - r;
+      acc -= src[(yl > 0 ? yl : 0) * w + x];
+    }
+  }
+}
+function boxFilter(src, w, h, r) { // una pasada (para guided filter)
+  r = Math.max(1, Math.round(r));
+  const a = new Float32Array(w * h), b = new Float32Array(w * h);
+  boxH(src, a, w, h, r); boxV(a, b, w, h, r); return b;
+}
+function gblur(src, w, h, sigma) { // ~gaussiano, 3 pasadas
+  const r = Math.round(sigma);
+  if (r < 1) return src.slice();
+  const a = new Float32Array(w * h), b = new Float32Array(w * h);
+  boxH(src, a, w, h, r); boxV(a, b, w, h, r);
+  boxH(b, a, w, h, r); boxV(a, b, w, h, r);
+  boxH(b, a, w, h, r); boxV(a, b, w, h, r);
+  return b;
+}
+function downsample(src, w, h, f) {
+  const w2 = Math.ceil(w / f), h2 = Math.ceil(h / f), out = new Float32Array(w2 * h2);
+  for (let y2 = 0; y2 < h2; y2++) {
+    const y0 = y2 * f, y1 = Math.min(h, y0 + f);
+    for (let x2 = 0; x2 < w2; x2++) {
+      const x0 = x2 * f, x1 = Math.min(w, x0 + f);
+      let s = 0, c = 0;
+      for (let y = y0; y < y1; y++) { const row = y * w; for (let x = x0; x < x1; x++) { s += src[row + x]; c++; } }
+      out[y2 * w2 + x2] = s / c;
+    }
+  }
+  return { d: out, w: w2, h: h2 };
+}
+function resample(src, sw, sh, w, h) { // bilineal
+  const out = new Float32Array(w * h), fx = sw / w, fy = sh / h;
+  for (let y = 0; y < h; y++) {
+    let sy = (y + 0.5) * fy - 0.5; if (sy < 0) sy = 0; if (sy > sh - 1) sy = sh - 1;
+    const y0 = sy | 0, y1 = Math.min(sh - 1, y0 + 1), ty = sy - y0;
+    for (let x = 0; x < w; x++) {
+      let sx = (x + 0.5) * fx - 0.5; if (sx < 0) sx = 0; if (sx > sw - 1) sx = sw - 1;
+      const x0 = sx | 0, x1 = Math.min(sw - 1, x0 + 1), tx = sx - x0;
+      const a = src[y0 * sw + x0], b = src[y0 * sw + x1], c = src[y1 * sw + x0], d = src[y1 * sw + x1];
+      out[y * w + x] = (a + (b - a) * tx) * (1 - ty) + (c + (d - c) * tx) * ty;
+    }
+  }
+  return out;
+}
+function blurBig(src, w, h, sigma) {
+  if (sigma <= 6) return gblur(src, w, h, sigma);
+  const f = Math.max(2, Math.floor(sigma / 3));
+  const ds = downsample(src, w, h, f);
+  const b = gblur(ds.d, ds.w, ds.h, sigma / f);
+  return resample(b, ds.w, ds.h, w, h);
+}
+function guided(I, p, w, h, r, eps) {
+  const n = w * h;
+  const mI = boxFilter(I, w, h, r), mp = boxFilter(p, w, h, r);
+  const Ip = new Float32Array(n), II = new Float32Array(n);
+  for (let i = 0; i < n; i++) { Ip[i] = I[i] * p[i]; II[i] = I[i] * I[i]; }
+  const mIp = boxFilter(Ip, w, h, r), mII = boxFilter(II, w, h, r);
+  const a = new Float32Array(n), b = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const v = mII[i] - mI[i] * mI[i], c = mIp[i] - mI[i] * mp[i];
+    a[i] = c / (v + eps); b[i] = mp[i] - a[i] * mI[i];
+  }
+  const ma = boxFilter(a, w, h, r), mb = boxFilter(b, w, h, r);
+  const q = new Float32Array(n);
+  for (let i = 0; i < n; i++) q[i] = ma[i] * I[i] + mb[i];
+  return q;
+}
+function lumOf(R, G, B) {
+  const n = R.length, L = new Float32Array(n);
+  for (let i = 0; i < n; i++) L[i] = 0.299 * R[i] + 0.587 * G[i] + 0.114 * B[i];
+  return L;
+}
+function smooth(e0, e1, x) { const t = clamp01((x - e0) / (e1 - e0)); return t * t * (3 - 2 * t); }
+
+/* ---------- Paletas de color (looks) ---------- */
+const PRESETS = [
+  { id: 'original', n: 'Original', p: {} },
+  { id: 'natural', n: 'Natural Pro', p: { con: .08, vib: .2, temp: .05, clar: .06 } },
+  { id: 'luminoso', n: 'Luminoso', p: { ev: .25, con: -.04, vib: .3, temp: .07, sh: .2, hlT: [.03, .02, 0], clar: -.04 } },
+  { id: 'vivido', n: 'Vívido', p: { con: .18, sat: .16, vib: .32, clar: .1 } },
+  { id: 'cine', n: 'Cine', p: { con: .22, fade: .04, sat: -.06, shT: [-.05, .02, .06], hlT: [.07, .03, -.04], temp: .03 } },
+  { id: 'atardecer', n: 'Atardecer', p: { temp: .35, tint: .08, con: .1, hlT: [.08, .03, -.03], shT: [.03, -.02, .04], vib: .15 } },
+  { id: 'pelicula', n: 'Película 400', p: { con: -.1, fade: .05, sat: -.08, temp: .1, hlT: [.04, .02, -.02], shT: [0, .02, .03], gam: [.97, 1, 1.04], grain: 18 } },
+  { id: 'clasico', n: 'Clásico Chrome', p: { con: .25, sat: -.25, shT: [-.03, .03, .02], hlT: [.03, .02, -.01], fade: .02, gam: [1.02, .98, 1.02] } },
+  { id: 'pastel', n: 'Pastel', p: { con: -.3, fade: .1, sat: -.2, hlT: [.05, .02, .04], ev: .15, crush: .02 } },
+  { id: 'instant', n: 'Instantánea', p: { fade: .07, temp: .1, shT: [-.02, .03, .03], hlT: [.05, .03, -.02], sat: -.08, con: .05, vig: 22 } },
+  { id: 'tropical', n: 'Tropical', p: { vib: .5, sat: .1, temp: .08, con: .12, gam: [.98, .97, 1], hlT: [.02, .03, 0] } },
+  { id: 'nordico', n: 'Nórdico', p: { temp: -.3, sat: -.3, fade: .06, con: .05, shT: [-.02, 0, .03] } },
+  { id: 'retro', n: 'Retro 70', p: { temp: .2, fade: .08, sat: -.1, shT: [0, .04, -.02], hlT: [.06, .04, -.04], con: .05, grain: 22 } },
+  { id: 'mate', n: 'Mate', p: { fade: .1, crush: .04, sat: -.12, con: .1 } },
+  { id: 'hdr', n: 'HDR Pop', p: { clar: .6, sh: .35, hl: -.35, vib: .25, con: .05 } },
+  { id: 'ambar', n: 'Ámbar', p: { temp: .25, gam: [.95, .98, 1.1], con: .12, hlT: [.06, .03, -.04], vib: .1 } },
+  { id: 'bosque', n: 'Bosque', p: { gam: [1.04, .95, 1.02], sat: .05, con: .1, shT: [-.02, .02, 0], temp: -.03 } },
+  { id: 'neon', n: 'Neón', p: { tint: .25, temp: -.15, sat: .25, con: .2, shT: [.03, -.02, .08], hlT: [.06, 0, .06] } },
+  { id: 'cross', n: 'Cross', p: { con: .2, sat: .15, gam: [.85, .92, 1.25], shT: [0, .02, .05], hlT: [.05, .05, -.06] } },
+  { id: 'noir', n: 'Noir', p: { bw: 1, bwMix: [.35, .5, .15], con: .45, vig: 35, grain: 20 } },
+  { id: 'bn', n: 'B&N Suave', p: { bw: 1, bwMix: [.3, .59, .11], con: -.05, fade: .05 } },
+  { id: 'sepia', n: 'Sepia', p: { bw: 1, bwMix: [.3, .59, .11], shT: [.05, .02, -.03], hlT: [.08, .04, -.04], fade: .05, vig: 20 } },
+];
+
+/* ---------- Estado ---------- */
+const DEF_ADJ = { exposure: 0, contrast: 0, highlights: 0, shadows: 0, whites: 0, blacks: 0, temp: 0, tint: 0, vibrance: 0, saturation: 0, clarity: 0, sharpen: 0, denoise: 0 };
+const DEF_FX = { vignette: 0, grain: 0, glow: 0, hdr: 0, tilt: 0, leak: 0, flare: 0, haze: 0 };
+let state = freshState();
+function freshState() {
+  return {
+    enhance: false, preset: 'original', presetAmt: 100,
+    adj: { ...DEF_ADJ }, fx: { ...DEF_FX },
+    bg: { mode: 'none', amt: 60, feather: 30, lens: 135, studio: '#ffffff' },
+    maskMode: 'auto', manual: null,
+    smile: { pts: [], amt: 50 }, skin: 0, light: 0,
+    rot: 0, flip: false,
+    print: { size: '10x15', orient: 'auto', fit: 'fill', frame: 'none', caption: '', sheet: 'single', cw: '10', ch: '15' }
+  };
+}
+let hist = [], redoStack = [];
+let srcFull = null;   // canvas orientado, tamaño de trabajo
+let prevSrc = null;   // canvas orientado a tamaño preview
+let auto = null;      // análisis automático
+let maskBase = null;  // {w,h,d} máscara de persona refinada (a tamaño preview)
+let maskCache = {};
+let lastOut = null;
+let imgEl = null, fileName = 'foto';
+let tapMode = null;   // 'smile' | 'focus'
+let detecting = false;
+
+/* ---------- Parámetros efectivos ---------- */
+function effective(st) {
+  const a = st.adj, pr = (PRESETS.find(p => p.id === st.preset) || PRESETS[0]).p, k = st.presetAmt / 100;
+  const en = st.enhance && auto;
+  const E = {
+    lo: en ? auto.lo : 0, hi: en ? auto.hi : 1, wb: en ? auto.wb : [1, 1, 1],
+    ev: a.exposure / 100 * 1.5 + (pr.ev || 0) * k + (en ? auto.ev : 0),
+    con: a.contrast / 100 + (pr.con || 0) * k + (en ? .08 : 0),
+    hl: a.highlights / 100 + (pr.hl || 0) * k + (en ? -.18 : 0),
+    sh: a.shadows / 100 + (pr.sh || 0) * k + (en ? .22 : 0),
+    whites: a.whites / 100, blacks: a.blacks / 100,
+    temp: a.temp / 100 + (pr.temp || 0) * k, tint: a.tint / 100 + (pr.tint || 0) * k,
+    vib: a.vibrance / 100 + (pr.vib || 0) * k + (en ? .25 : 0),
+    sat: a.saturation / 100 + (pr.sat || 0) * k,
+    clar: a.clarity / 100 + (pr.clar || 0) * k + (en ? .15 : 0) + st.fx.hdr / 100 * .7,
+    sharp: a.sharpen / 100 + (en ? .3 : 0),
+    fade: (pr.fade || 0) * k, crush: (pr.crush || 0) * k,
+    gam: (pr.gam || [1, 1, 1]).map(g => 1 + (g - 1) * k),
+    shT: (pr.shT || [0, 0, 0]).map(v => v * k), hlT: (pr.hlT || [0, 0, 0]).map(v => v * k),
+    bw: (pr.bw || 0) * k, bwMix: pr.bwMix || [.3, .59, .11],
+    vig: st.fx.vignette / 100 + (pr.vig || 0) / 100 * k,
+    grain: st.fx.grain / 100 + (pr.grain || 0) / 100 * k,
+  };
+  if (st.fx.hdr) { E.sh += st.fx.hdr / 100 * .35; E.hl -= st.fx.hdr / 100 * .4; E.vib += st.fx.hdr / 100 * .15; }
+  return E;
+}
+
+/* ---------- Análisis automático (mejorar con un toque) ---------- */
+function analyze(canvas) {
+  const w = canvas.width, h = canvas.height, d = canvas.getContext('2d').getImageData(0, 0, w, h).data;
+  const hist = new Uint32Array(256); let sr = 0, sg = 0, sb = 0, c = 0, n = 0;
+  for (let i = 0; i < d.length; i += 16) {
+    const r = d[i], g = d[i + 1], b = d[i + 2], L = (0.299 * r + 0.587 * g + 0.114 * b) | 0;
+    hist[L]++; n++;
+    if (L > 40 && L < 215) { sr += r; sg += g; sb += b; c++; }
+  }
+  const pct = q => { let acc = 0; for (let i = 0; i < 256; i++) { acc += hist[i]; if (acc >= q * n) return i / 255; } return 1; };
+  let lo = pct(.004), hi = pct(.996), med = pct(.5);
+  lo = Math.min(lo, .12); hi = Math.max(hi, .8);
+  let wb = [1, 1, 1];
+  if (c > 50) {
+    const m = (sr + sg + sb) / 3;
+    wb = [sr, sg, sb].map(s => { const g = m / s; return 1 + (Math.min(1.25, Math.max(.8, g)) - 1) * .6; });
+  }
+  const medN = (med - lo) / (hi - lo);
+  const ev = Math.max(-.35, Math.min(.7, (.47 - medN) * 1.6));
+  return { lo, hi, wb, ev };
+}
+
+/* ---------- Retoque de sonrisa (deformación suave local) ---------- */
+function smileWarp(img, w, h, ptsN, amt) {
+  if (ptsN.length < 2 || amt <= 0) return;
+  let p1 = { x: ptsN[0].x * w, y: ptsN[0].y * h }, p2 = { x: ptsN[1].x * w, y: ptsN[1].y * h };
+  if (p1.x > p2.x) [p1, p2] = [p2, p1];
+  const dx = p2.x - p1.x, dy = p2.y - p1.y, mw = Math.hypot(dx, dy);
+  if (mw < 4) return;
+  const ux = dx / mw, uy = dy / mw;
+  let px = uy, py = -ux; if (py > 0) { px = -px; py = -py; } // "arriba" perpendicular a la boca
+  const A = amt * 0.13 * mw, s1 = 0.36 * mw, s2 = 0.55 * mw;
+  const corners = [
+    { x: p1.x, y: p1.y, ox: -ux, oy: -uy },
+    { x: p2.x, y: p2.y, ox: ux, oy: uy }];
+  const cheeks = corners.map(c => ({ x: c.x + px * .38 * mw + c.ox * .12 * mw, y: c.y + py * .38 * mw + c.oy * .12 * mw }));
+  const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+  const pad = 3 * s2 + mw * .6;
+  const x0 = Math.max(0, Math.floor(Math.min(p1.x, p2.x) - pad)), x1 = Math.min(w - 1, Math.ceil(Math.max(p1.x, p2.x) + pad));
+  const y0 = Math.max(0, Math.floor(Math.min(p1.y, p2.y) - pad)), y1 = Math.min(h - 1, Math.ceil(Math.max(p1.y, p2.y) + pad));
+  const src = new Uint8ClampedArray(img.data), out = img.data;
+  const i1 = 1 / (2 * s1 * s1), i2 = 1 / (2 * s2 * s2), im = 1 / (2 * (0.3 * mw) ** 2);
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      let Dx = 0, Dy = 0;
+      for (let k = 0; k < 2; k++) {
+        const c = corners[k], g = Math.exp(-((x - c.x) ** 2 + (y - c.y) ** 2) * i1);
+        Dx += g * (px * A + c.ox * A * .3); Dy += g * (py * A + c.oy * A * .3);
+        const ch = cheeks[k], g2 = Math.exp(-((x - ch.x) ** 2 + (y - ch.y) ** 2) * i2);
+        Dx += g2 * px * A * .3; Dy += g2 * py * A * .3;
+      }
+      // el centro del labio baja apenas: forma de "U"
+      const gm = Math.exp(-((x - mid.x) ** 2 + (y - mid.y) ** 2) * im);
+      Dx -= gm * px * A * .12; Dy -= gm * py * A * .12;
+      if (Math.abs(Dx) + Math.abs(Dy) < 0.02) continue;
+      let sx = x - Dx, sy = y - Dy;
+      if (sx < 0) sx = 0; if (sy < 0) sy = 0; if (sx > w - 1.001) sx = w - 1.001; if (sy > h - 1.001) sy = h - 1.001;
+      const xi = sx | 0, yi = sy | 0, tx = sx - xi, ty = sy - yi;
+      const o = (y * w + x) * 4, a = (yi * w + xi) * 4, b = a + 4, c2 = a + w * 4, d = c2 + 4;
+      for (let ch = 0; ch < 3; ch++) {
+        out[o + ch] = (src[a + ch] * (1 - tx) + src[b + ch] * tx) * (1 - ty) + (src[c2 + ch] * (1 - tx) + src[d + ch] * tx) * ty;
+      }
+    }
+  }
+}
+
+/* ---------- Etapa de color ---------- */
+function buildLUT(E, gam) {
+  const N = 2048, lut = new Float32Array(N);
+  const c = E.con * .9, e = c >= 0 ? 1 + c * 1.5 : 1 / (1 - c * 1.2);
+  for (let k = 0; k < N; k++) {
+    let v = k / (N - 1) * 2;
+    if (v > .85) v = .85 + .15 * (1 - Math.exp(-(v - .85) / .15));
+    v = clamp01(v);
+    if (gam !== 1) v = Math.pow(v, gam);
+    if (E.whites) v = clamp01(v * (1 + E.whites * .22 * v * v));
+    if (E.blacks) v = clamp01(v + E.blacks * .15 * Math.pow(1 - v, 4));
+    if (c) v = v < .5 ? .5 * Math.pow(2 * v, e) : 1 - .5 * Math.pow(2 - 2 * v, e);
+    v = E.fade + v * (1 - E.fade - E.crush);
+    lut[k] = v;
+  }
+  return lut;
+}
+function colorStage(R, G, B, w, h, E) {
+  const n = w * h, long = Math.max(w, h);
+  const sq = Math.sqrt(Math.pow(2, E.ev)), sc = 1 / (E.hi - E.lo);
+  const tR = 1 + E.temp * .1 + E.tint * .03, tG = 1 - E.tint * .07, tB = 1 - E.temp * .1 + E.tint * .03;
+  const mR = sc * E.wb[0] * tR * sq, mG = sc * E.wb[1] * tG * sq, mB = sc * E.wb[2] * tB * sq, lo = E.lo;
+  for (let i = 0; i < n; i++) {
+    R[i] = (R[i] - lo) * mR; G[i] = (G[i] - lo) * mG; B[i] = (B[i] - lo) * mB;
+  }
+  if (E.sh || E.hl || E.clar) {
+    const L = lumOf(R, G, B);
+    const Lb = (E.sh || E.hl) ? blurBig(L, w, h, long * .03) : null;
+    const Lc = E.clar ? blurBig(L, w, h, long * .008) : null;
+    const sh = E.sh, hl = E.hl, cl = E.clar * 1.6;
+    for (let i = 0; i < n; i++) {
+      let g = 1;
+      if (Lb) {
+        const lb = clamp01(Lb[i]);
+        if (sh) g *= 1 + sh * (sh > 0 ? 1 : .6) * (1 - lb) * (1 - lb);
+        if (hl) g *= 1 + hl * .45 * lb * lb;
+        if (g < .2) g = .2;
+      }
+      let d = 0;
+      if (Lc) { const l = clamp01(L[i]); d = cl * (L[i] - Lc[i]) * (4 * l * (1 - l) + .2); }
+      R[i] = R[i] * g + d; G[i] = G[i] * g + d; B[i] = B[i] * g + d;
+    }
+  }
+  const lr = buildLUT(E, E.gam[0]), lg = (E.gam[1] === E.gam[0]) ? lr : buildLUT(E, E.gam[1]), lb = (E.gam[2] === E.gam[0]) ? lr : buildLUT(E, E.gam[2]);
+  const sat = 1 + E.sat, vib = E.vib, bw = E.bw, bm = E.bwMix, sT = E.shT, hT = E.hlT;
+  const hasSplit = sT.some(v => v) || hT.some(v => v);
+  for (let i = 0; i < n; i++) {
+    let ir = (R[i] * 1023.5) | 0, ig = (G[i] * 1023.5) | 0, ib = (B[i] * 1023.5) | 0;
+    let r = lr[ir < 0 ? 0 : ir > 2047 ? 2047 : ir], g = lg[ig < 0 ? 0 : ig > 2047 ? 2047 : ig], b = lb[ib < 0 ? 0 : ib > 2047 ? 2047 : ib];
+    let L = .299 * r + .587 * g + .114 * b;
+    if (sat !== 1 || vib) {
+      const mx = r > g ? (r > b ? r : b) : (g > b ? g : b), mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
+      const f = sat * (1 + vib * (1 - (mx - mn)) * (vib > 0 ? 1.3 : 1));
+      r = L + (r - L) * f; g = L + (g - L) * f; b = L + (b - L) * f;
+    }
+    if (bw) {
+      const y = r * bm[0] + g * bm[1] + b * bm[2];
+      r += (y - r) * bw; g += (y - g) * bw; b += (y - b) * bw; L = y;
+    }
+    if (hasSplit) {
+      const l = clamp01(L), ws = (1 - l) * (1 - l), wh = l * l;
+      r += sT[0] * ws + hT[0] * wh; g += sT[1] * ws + hT[1] * wh; b += sT[2] * ws + hT[2] * wh;
+    }
+    R[i] = r; G[i] = g; B[i] = b;
+  }
+}
+
+/* ---------- Máscara de persona ---------- */
+function maskFor(W, H, Lguide) {
+  if (state.maskMode === 'manual' && state.manual) return manualMask(W, H);
+  if (!maskBase) return null;
+  const key = W + 'x' + H;
+  if (maskCache[key]) return maskCache[key];
+  let m = (W === maskBase.w && H === maskBase.h) ? maskBase.d : resample(maskBase.d, maskBase.w, maskBase.h, W, H);
+  if (W > maskBase.w * 1.4 && Lguide) { // refinar bordes a alta resolución
+    const q = guided(Lguide, m, W, H, Math.max(3, Math.round(Math.max(W, H) / 220)), 2e-3);
+    m = new Float32Array(W * H); for (let i = 0; i < m.length; i++) m[i] = clamp01(q[i]);
+  }
+  maskCache = { [key]: m };
+  return m;
+}
+function manualMask(W, H) {
+  const mm = state.manual, m = new Float32Array(W * H);
+  const cx = mm.x * W, cy = mm.y * H, rx = mm.s * Math.min(W, H) * .5, ry = rx * 1.35;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const d = Math.sqrt(((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2);
+    m[y * W + x] = 1 - smooth(.75, 1.15, d);
+  }
+  return m;
+}
+function featherMask(m, w, h) {
+  const f = state.bg.feather / 100, long = Math.max(w, h);
+  const s = long * (.0015 + f * .006);
+  return gblur(m, w, h, s);
+}
+function centroid(m, w, h) {
+  if (!m) return { x: .5, y: .45 };
+  let sx = 0, sy = 0, s = 0;
+  for (let y = 0; y < h; y += 2) for (let x = 0; x < w; x += 2) { const v = m[y * w + x]; if (v > .5) { sx += x * v; sy += y * v; s += v; } }
+  if (s < 10) return { x: .5, y: .45 };
+  return { x: sx / s / w, y: sy / s / h };
+}
+
+/* ---------- Etapa de fondo ---------- */
+function bgBlur(R, G, B, w, h, m, sigma, boost) {
+  // desenfoque "de lente": en luz lineal, ignorando a la persona (sin halo)
+  const n = w * h, wt = new Float32Array(n), ch = [R, G, B], out = [];
+  for (let i = 0; i < n; i++) wt[i] = 1 - Math.min(1, m[i] * 1.7);
+  const den = blurBig(wt, w, h, sigma);
+  for (let c = 0; c < 3; c++) {
+    const P = ch[c], t = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      let v = clamp01(P[i]); v = v * v;
+      if (boost) { const l = clamp01(.299 * R[i] + .587 * G[i] + .114 * B[i]); v *= 1 + boost * smooth(.6, .95, l); }
+      t[i] = v * wt[i];
+    }
+    const num = blurBig(t, w, h, sigma), o = new Float32Array(n);
+    for (let i = 0; i < n; i++) { const d = den[i]; o[i] = d > 1e-3 ? Math.sqrt(Math.max(0, num[i] / d)) : P[i]; }
+    out.push(o);
+  }
+  return out;
+}
+function bgStage(R, G, B, w, h, m) {
+  const bg = state.bg, mode = bg.mode;
+  if (mode === 'none' || !m) return;
+  const n = w * h, long = Math.max(w, h), a = bg.amt / 100;
+  const mf = featherMask(m, w, h);
+  let Bk;
+  if (mode === 'retrato') {
+    Bk = bgBlur(R, G, B, w, h, m, long * (.004 + .026 * a), .8);
+  } else if (mode === 'tele') {
+    const k = { 85: .65, 135: 1, 200: 1.35 }[bg.lens] * (.3 + .7 * a);
+    const B1 = bgBlur(R, G, B, w, h, m, long * .01 * k, 1.2), B2 = bgBlur(R, G, B, w, h, m, long * .038 * k, 1.6);
+    const dm = blurBig(m, w, h, long * .07);
+    Bk = [new Float32Array(n), new Float32Array(n), new Float32Array(n)];
+    for (let i = 0; i < n; i++) {
+      const d = clamp01((1 - dm[i]) * 1.4);
+      for (let c = 0; c < 3; c++) Bk[c][i] = B1[c][i] + (B2[c][i] - B1[c][i]) * d;
+    }
+  } else if (mode === 'difuminar') {
+    Bk = bgBlur(R, G, B, w, h, m, long * (.006 + .02 * a), .5);
+    const mist = .45 * a;
+    for (let c = 0; c < 3; c++) for (let i = 0; i < n; i++) Bk[c][i] += (.97 - Bk[c][i]) * mist;
+  } else if (mode === 'colorpop') {
+    Bk = [new Float32Array(n), new Float32Array(n), new Float32Array(n)];
+    for (let i = 0; i < n; i++) {
+      const L = .299 * R[i] + .587 * G[i] + .114 * B[i];
+      Bk[0][i] = R[i] + (L - R[i]) * a; Bk[1][i] = G[i] + (L - G[i]) * a; Bk[2][i] = B[i] + (L - B[i]) * a;
+    }
+  } else if (mode === 'oscuro') {
+    Bk = bgBlur(R, G, B, w, h, m, long * .006, 0);
+    const k = 1 - .75 * a;
+    for (let c = 0; c < 3; c++) for (let i = 0; i < n; i++) Bk[c][i] *= k;
+  } else if (mode === 'estudio') {
+    const col = hexRGB(bg.studio), cen = centroid(m, w, h);
+    Bk = [new Float32Array(n), new Float32Array(n), new Float32Array(n)];
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const d = Math.hypot((x / w - cen.x) * w / long, (y / h - cen.y) * h / long);
+      const s = 1.06 - d * .35 * a; const i = y * w + x;
+      Bk[0][i] = col[0] * s; Bk[1][i] = col[1] * s; Bk[2][i] = col[2] * s;
+    }
+  }
+  for (let i = 0; i < n; i++) {
+    const k = mf[i];
+    R[i] = Bk[0][i] + (R[i] - Bk[0][i]) * k; G[i] = Bk[1][i] + (G[i] - Bk[1][i]) * k; B[i] = Bk[2][i] + (B[i] - Bk[2][i]) * k;
+  }
+}
+function hexRGB(h) { const v = parseInt(h.slice(1), 16); return [(v >> 16 & 255) / 255, (v >> 8 & 255) / 255, (v & 255) / 255]; }
+
+/* ---------- Retrato: piel suave y luz ---------- */
+function skinStage(R, G, B, w, h, m, amt) {
+  const long = Math.max(w, h), r = Math.max(2, Math.round(long * .006)), eps = .0025 + .006 * amt;
+  const n = w * h, chs = [R, G, B];
+  for (const P of chs) {
+    const q = guided(P, P, w, h, r, eps);
+    for (let i = 0; i < n; i++) { const k = amt * .85 * (m ? m[i] : 1); P[i] += (q[i] - P[i]) * k; }
+  }
+}
+function lightStage(R, G, B, n, m, amt) {
+  for (let i = 0; i < n; i++) { const k = 1 + amt * (m[i] * .28 - (1 - m[i]) * .15); R[i] *= k; G[i] *= k; B[i] *= k; }
+}
+
+/* ---------- Efectos ---------- */
+function fxStage(R, G, B, w, h, E, m) {
+  const fx = state.fx, n = w * h, long = Math.max(w, h);
+  if (fx.glow) {
+    const a = fx.glow / 100, s = long * .012;
+    const bl = [blurBig(R, w, h, s), blurBig(G, w, h, s), blurBig(B, w, h, s)];
+    const chs = [R, G, B];
+    for (let c = 0; c < 3; c++) { const P = chs[c], Q = bl[c]; for (let i = 0; i < n; i++) { const x = clamp01(P[i]), y = clamp01(Q[i]) * .85; const sc = 1 - (1 - x) * (1 - y); P[i] = x + (sc - x) * a * .7; } }
+  }
+  if (fx.tilt) {
+    const a = fx.tilt / 100, cy = centroid(m, w, h).y, s = long * .014 * (.4 + a);
+    const bl = [blurBig(R, w, h, s), blurBig(G, w, h, s), blurBig(B, w, h, s)], chs = [R, G, B];
+    for (let y = 0; y < h; y++) {
+      const t = smooth(.1, .35, Math.abs(y / h - cy));
+      for (let x = 0; x < w; x++) { const i = y * w + x, k = m ? t * (1 - m[i]) : t; for (let c = 0; c < 3; c++) chs[c][i] += (bl[c][i] - chs[c][i]) * k; }
+    }
+    for (let i = 0; i < n; i++) { const L = .299 * R[i] + .587 * G[i] + .114 * B[i], f = 1 + .25 * a; R[i] = L + (R[i] - L) * f; G[i] = L + (G[i] - L) * f; B[i] = L + (B[i] - L) * f; }
+  }
+  if (fx.haze) {
+    const a = fx.haze / 100 * .35;
+    for (let i = 0; i < n; i++) { R[i] += (.93 - R[i]) * a; G[i] += (.94 - G[i]) * a; B[i] += (.96 - B[i]) * a; }
+  }
+  if (fx.leak) {
+    const a = fx.leak / 100;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const i = y * w + x, d = Math.hypot(x / long, (y - h * .15) / long);
+      const k = a * Math.exp(-d * d / .06) * .9, k2 = a * Math.exp(-((x - w) ** 2 + (y - h) ** 2) / (long * long * .05)) * .5;
+      R[i] = 1 - (1 - R[i]) * (1 - k * 1 - k2 * .9); G[i] = 1 - (1 - G[i]) * (1 - k * .45 - k2 * .25); B[i] = 1 - (1 - B[i]) * (1 - k * .12 - k2 * .5);
+    }
+  }
+  if (fx.flare) {
+    const a = fx.flare / 100, fx0 = w * .82, fy0 = h * .1;
+    const ax = w * .5 - fx0, ay = h * .55 - fy0;
+    const ghosts = [{ t: .55, r: .03, c: [.5, .9, .7] }, { t: .85, r: .05, c: [.9, .6, .9] }, { t: 1.25, r: .08, c: [.6, .8, 1] }];
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const i = y * w + x, d = Math.hypot(x - fx0, y - fy0) / long;
+      let kr = a * (Math.exp(-d * d / .004) * .95 + Math.exp(-d * d / .08) * .35), kg = kr * .85, kb = kr * .55;
+      for (const g of ghosts) {
+        const gx = fx0 + ax * g.t * 2, gy = fy0 + ay * g.t * 2, gd = Math.hypot(x - gx, y - gy) / long;
+        const v = a * .18 * (1 - smooth(g.r * .7, g.r, gd)); kr += v * g.c[0]; kg += v * g.c[1]; kb += v * g.c[2];
+      }
+      R[i] = 1 - (1 - R[i]) * (1 - Math.min(1, kr)); G[i] = 1 - (1 - G[i]) * (1 - Math.min(1, kg)); B[i] = 1 - (1 - B[i]) * (1 - Math.min(1, kb));
+    }
+  }
+  if (E.sharp > 0) {
+    const L = lumOf(R, G, B), Lb = gblur(L, w, h, Math.max(1, long / 1400)), k = E.sharp * 1.3;
+    const skin = state.skin / 100;
+    for (let i = 0; i < n; i++) { let d = (L[i] - Lb[i]) * k; if (skin && m) d *= 1 - m[i] * skin * .8; R[i] += d; G[i] += d; B[i] += d; }
+  }
+  if (E.vig > 0) {
+    const a = Math.min(1, E.vig);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const dx = (x / w - .5) * 2, dy = (y / h - .5) * 2, r = Math.sqrt(dx * dx * .85 + dy * dy * .85);
+      const k = 1 - a * .65 * smooth(.45, 1.35, r), i = y * w + x; R[i] *= k; G[i] *= k; B[i] *= k;
+    }
+  }
+  if (E.grain > 0) {
+    const a = Math.min(1, E.grain) * .09, gs = Math.max(1, Math.round(long / 1300));
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const gx = (x / gs) | 0, gy = (y / gs) | 0;
+      let s = (gx * 374761393 + gy * 668265263) | 0; s = (s ^ (s >>> 13)) * 1274126177 | 0; s ^= s >>> 16;
+      const nz = ((s & 1023) / 1023 - .5) * 2, i = y * w + x, L = clamp01(.299 * R[i] + .587 * G[i] + .114 * B[i]);
+      const d = nz * a * (.4 + 2.4 * L * (1 - L)); R[i] += d; G[i] += d; B[i] += d;
+    }
+  }
+}
+
+/* ---------- Render completo ---------- */
+function render(source, W, H) {
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(source, 0, 0, W, H);
+  const img = ctx.getImageData(0, 0, W, H), d = img.data, n = W * H;
+  if (state.smile.pts.length === 2) smileWarp(img, W, H, state.smile.pts, state.smile.amt / 100);
+  const R = new Float32Array(n), G = new Float32Array(n), B = new Float32Array(n);
+  for (let i = 0, j = 0; i < n; i++, j += 4) { R[i] = d[j] / 255; G[i] = d[j + 1] / 255; B[i] = d[j + 2] / 255; }
+  const E = effective(state);
+  const needMask = state.bg.mode !== 'none' || state.skin || state.light || state.fx.tilt;
+  const m = needMask ? maskFor(W, H, W > PREVIEW_MAX * 1.2 ? lumOf(R, G, B) : null) : null;
+  if (state.adj.denoise) skinStage(R, G, B, W, H, null, state.adj.denoise / 100 * .55);
+  if (state.skin) skinStage(R, G, B, W, H, m, state.skin / 100);
+  colorStage(R, G, B, W, H, E);
+  if (m && state.light) lightStage(R, G, B, n, m, state.light / 100);
+  bgStage(R, G, B, W, H, m);
+  fxStage(R, G, B, W, H, E, m);
+  for (let i = 0, j = 0; i < n; i++, j += 4) { d[j] = R[i] * 255 + .5; d[j + 1] = G[i] * 255 + .5; d[j + 2] = B[i] * 255 + .5; d[j + 3] = 255; }
+  ctx.putImageData(img, 0, 0);
+  if (state.bg.mode === 'tele' && m) { // compresión de teleobjetivo: recorte centrado en la persona
+    const z = { 85: 1.06, 135: 1.16, 200: 1.3 }[state.bg.lens], c = centroid(m, W, H);
+    const cw = W / z, chh = H / z;
+    const sx = Math.min(W - cw, Math.max(0, c.x * W - cw / 2)), sy = Math.min(H - chh, Math.max(0, c.y * H - chh * .45));
+    const cv2 = document.createElement('canvas'); cv2.width = W; cv2.height = H;
+    const c2 = cv2.getContext('2d'); c2.imageSmoothingQuality = 'high'; c2.drawImage(cv, sx, sy, cw, chh, 0, 0, W, H);
+    return cv2;
+  }
+  return cv;
+}
+
+/* ---------- Carga de imagen y orientación ---------- */
+function fitSize(w, h, max) { const s = Math.min(1, max / Math.max(w, h)); return [Math.round(w * s), Math.round(h * s)]; }
+function makeSources(im, rot, flip) {
+  const iw = im.naturalWidth || im.width, ih = im.naturalHeight || im.height;
+  let [w, h] = fitSize(iw, ih, EXPORT_MAX);
+  const sw = rot % 180 ? h : w, sh = rot % 180 ? w : h;
+  const full = document.createElement('canvas'); full.width = sw; full.height = sh;
+  const c = full.getContext('2d'); c.imageSmoothingQuality = 'high';
+  c.translate(sw / 2, sh / 2); c.rotate(rot * Math.PI / 180); if (flip) c.scale(-1, 1);
+  c.drawImage(im, -w / 2, -h / 2, w, h);
+  const [pw, ph] = fitSize(sw, sh, PREVIEW_MAX);
+  const prev = document.createElement('canvas'); prev.width = pw; prev.height = ph;
+  const p = prev.getContext('2d', { willReadFrequently: true }); p.imageSmoothingQuality = 'high'; p.drawImage(full, 0, 0, pw, ph);
+  return { full, prev, auto: analyze(prev) };
+}
+function buildSources() {
+  const S = makeSources(imgEl, state.rot, state.flip);
+  srcFull = S.full; prevSrc = S.prev; auto = S.auto;
+  maskBase = null; maskCache = {};
+  thumbsDirty = true;
+}
+async function openFile(f) {
+  if (!f) return;
+  fileName = (f.name || 'foto').replace(/\.[^.]+$/, '');
+  busy(true);
+  let im;
+  try { im = await decodeAny(f); }
+  catch (e) { busy(false); toast(e.message, 6000); return; }
+  imgEl = im; state = freshState(); hist = []; redoStack = []; buildSources();
+  const ar = recipes.find(r => r.id === autoRecipe);
+  if (ar) { applyRecipe(state, ar); lastSnap = snap(); setTimeout(() => toast('⚡ Edición «' + ar.name + '» aplicada'), 300); }
+  else toast('Foto abierta', 1200);
+  $('#fname').textContent = f.name || '';
+  $('#empty').style.display = 'none'; $('#view').style.display = 'block'; $('#magic').style.display = 'block';
+  ['#bBefore', '#bSave'].forEach(s => $(s).disabled = false);
+  updateUndo(); buildPanel(); requestRender(false); busy(false);
+  if (needsMask()) ensureMask();
+}
+
+
+/* ---------- Abrir cualquier formato de foto ---------- */
+const RAW_EXT = /\.(dng|cr2|cr3|crw|nef|nrw|arw|srf|sr2|raf|orf|rw2|rwl|pef|ptx|srw|x3f|3fr|erf|kdc|dcr|mrw|mos|mef|iiq|raw|gpr|fff)$/i;
+function nativeDecode(file) {
+  return new Promise((res, rej) => {
+    let blob = file;
+    if (/\.svg$/i.test(file.name || '') && file.type !== 'image/svg+xml') blob = new Blob([file], { type: 'image/svg+xml' });
+    const im = new Image();
+    im.onload = () => {
+      if (!im.naturalWidth) { // SVG sin tamaño propio
+        const c = document.createElement('canvas'); c.width = 2000; c.height = 2000; c.getContext('2d').drawImage(im, 0, 0, 2000, 2000); res(c); return;
+      }
+      if (/svg/.test(blob.type)) { // los SVG se dibujan grandes para no perder nitidez
+        const k = Math.max(1, 2400 / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement('canvas');
+        c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
+        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(im, 0, 0, c.width, c.height); res(c); return;
+      }
+      res(im);
+    };
+    im.onerror = () => rej(new Error('nativo'));
+    im.src = URL.createObjectURL(blob);
+  });
+}
+function rgbaCanvas(w, h, rgba) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d'), id = x.createImageData(w, h); id.data.set(rgba); x.putImageData(id, 0, 0); return c;
+}
+async function heifDecode(buf) {
+  if (!window.libheif) await loadScript('lib/heif.js');
+  let m = window.__heifMod;
+  if (!m) {
+    m = typeof libheif === 'function' ? libheif() : libheif;
+    if (m && !m.HeifDecoder && m.ready) m = await m.ready;
+    if (m && !m.HeifDecoder && typeof m.then === 'function') m = await new Promise(r => m.then(x => { delete x.then; r(x); }));
+    window.__heifMod = m;
+  }
+  const dec = new m.HeifDecoder(), imgs = dec.decode(new Uint8Array(buf));
+  if (!imgs || !imgs.length) throw new Error('HEIF vacío');
+  const im = imgs[0], w = im.get_width(), h = im.get_height();
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d'), id = x.createImageData(w, h);
+  await new Promise((res, rej) => im.display(id, d => d ? res() : rej(new Error('HEIF'))));
+  x.putImageData(id, 0, 0); try { im.free && im.free(); } catch (e) { }
+  return c;
+}
+async function psdDecode(buf) {
+  if (!window.agPsd) await loadScript('lib/agpsd.js');
+  const psd = agPsd.readPsd(buf, { skipLayerImageData: true, skipThumbnail: true });
+  if (psd.canvas) return psd.canvas;
+  if (psd.imageData) return rgbaCanvas(psd.imageData.width, psd.imageData.height, psd.imageData.data);
+  throw new Error('PSD sin imagen combinada');
+}
+async function utifDecode(buf) {
+  if (!window.pako) await loadScript('lib/pako.min.js');
+  if (!window.UTIF) await loadScript('lib/UTIF.js');
+  const ifds = UTIF.decode(buf); let best = null;
+  const all = []; ifds.forEach(f => { all.push(f); (f.subIFD || []).forEach(s => all.push(s)); });
+  for (const f of all) { const w = f.t256 && f.t256[0], h = f.t257 && f.t257[0]; if (w && h && (!best || w * h > best.w * best.h)) best = { f, w, h }; }
+  if (!best) throw new Error('TIFF sin imagen');
+  UTIF.decodeImage(buf, best.f, ifds);
+  const rgba = UTIF.toRGBA8(best.f);
+  return rgbaCanvas(best.f.width, best.f.height, rgba);
+}
+function tiffOrientation(u8) { // orientación EXIF (tag 274) del IFD0 de un RAW tipo TIFF
+  try {
+    const le = u8[0] === 0x49, dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+    if (!((u8[0] === 0x49 && u8[1] === 0x49) || (u8[0] === 0x4d && u8[1] === 0x4d))) return 1;
+    const off = dv.getUint32(4, le), n = dv.getUint16(off, le);
+    for (let i = 0; i < n; i++) { const e = off + 2 + i * 12; if (dv.getUint16(e, le) === 274) return dv.getUint16(e + 8, le); }
+  } catch (e) { }
+  return 1;
+}
+function jpegSize(u8, p) { // lee ancho/alto del SOF sin decodificar
+  let i = p + 2, n = u8.length;
+  while (i + 9 < n) {
+    if (u8[i] !== 0xFF) return null;
+    const mk = u8[i + 1];
+    if (mk === 0xD8 || (mk >= 0xD0 && mk <= 0xD7) || mk === 0x01) { i += 2; continue; }
+    const len = (u8[i + 2] << 8) | u8[i + 3];
+    if (len < 2) return null;
+    if ((mk >= 0xC0 && mk <= 0xC3) || (mk >= 0xC5 && mk <= 0xC7) || (mk >= 0xC9 && mk <= 0xCB) || (mk >= 0xCD && mk <= 0xCF)) {
+      return { h: (u8[i + 5] << 8) | u8[i + 6], w: (u8[i + 7] << 8) | u8[i + 8] };
+    }
+    if (mk === 0xDA) return null;
+    i += 2 + len;
+  }
+  return null;
+}
+async function rawPreview(file, buf) { // la vista previa JPEG en máxima resolución que traen los RAW
+  const u8 = new Uint8Array(buf); let best = null, count = 0;
+  for (let i = 0; i < u8.length - 4 && count < 400; i++) {
+    if (u8[i] === 0xFF && u8[i + 1] === 0xD8 && u8[i + 2] === 0xFF) {
+      count++;
+      const sz = jpegSize(u8, i);
+      if (sz && sz.w > 64 && sz.h > 64 && (!best || sz.w * sz.h > best.w * best.h)) best = { p: i, ...sz };
+    }
+  }
+  if (!best) throw new Error('sin vista previa');
+  const im = await nativeDecode(new File([file.slice(best.p)], 'preview.jpg', { type: 'image/jpeg' }));
+  const o = tiffOrientation(u8);
+  if (o === 1 || ![3, 6, 8].includes(o)) return im;
+  const w = im.naturalWidth || im.width, h = im.naturalHeight || im.height, c = document.createElement('canvas');
+  c.width = o === 3 ? w : h; c.height = o === 3 ? h : w;
+  const x = c.getContext('2d'); x.translate(c.width / 2, c.height / 2); x.rotate(o === 3 ? Math.PI : o === 6 ? Math.PI / 2 : -Math.PI / 2); x.drawImage(im, -w / 2, -h / 2);
+  return c;
+}
+async function decodeAny(file) {
+  const name = file.name || '', head = new Uint8Array(await file.slice(0, 32).arrayBuffer());
+  const brand = String.fromCharCode(...head.slice(4, 12));
+  const isTIFF = (head[0] === 0x49 && head[1] === 0x49 && (head[2] === 0x2A || head[2] === 0x52 || head[2] === 0x55)) || (head[0] === 0x4D && head[1] === 0x4D && head[3] === 0x2A);
+  const isHEIF = brand.startsWith('ftyp') && /heic|heix|hevc|hevx|heim|heis|mif1|msf1|avif|avis/.test(brand.slice(4)) || /\.(heic|heif|hif)$/i.test(name);
+  const isCR3 = brand.startsWith('ftypcrx');
+  const isPSD = head[0] === 0x38 && head[1] === 0x42 && head[2] === 0x50 && head[3] === 0x53;
+  const isRAW = RAW_EXT.test(name) || isCR3;
+  const errs = [];
+  if (!isRAW && !isPSD) { try { return await nativeDecode(file); } catch (e) { errs.push(e.message); } }
+  const buf = await file.arrayBuffer();
+  const tries = [];
+  if (isPSD) tries.push(() => psdDecode(buf));
+  if (isHEIF) tries.push(() => heifDecode(buf));
+  if (isRAW) tries.push(() => rawPreview(file, buf), () => utifDecode(buf));
+  if (isTIFF && !isRAW) tries.push(() => utifDecode(buf), () => rawPreview(file, buf));
+  tries.push(() => rawPreview(file, buf), () => heifDecode(buf), () => utifDecode(buf), () => psdDecode(buf));
+  for (const t of tries) { try { const r = await t(); if (r && (r.width || r.naturalWidth)) return r; } catch (e) { errs.push(e.message); } }
+  console.warn('decodeAny', name, errs);
+  throw new Error('No pude leer «' + name + '». Probá exportarla como JPG o PNG.');
+}
+
+/* ---------- Detección de persona (IA en el navegador) ---------- */
+let segPromise = null;
+function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error(src)); document.head.appendChild(s); }); }
+function getSegmenter() {
+  if (!segPromise) segPromise = (async () => {
+    if (!window.SelfieSegmentation) await loadScript('mp/selfie_segmentation.js');
+    const seg = new SelfieSegmentation({ locateFile: f => (window.__RIVA_ASSETS && window.__RIVA_ASSETS[f]) || 'mp/' + ({ 'selfie_segmentation.tflite': 'model.txt', 'selfie_segmentation.binarypb': 'graph.txt' }[f] || f.replace('selfie_segmentation_solution_wasm_bin', 'selfie_segmentation_solution_simd_wasm_bin')) });
+    seg.setOptions({ modelSelection: 0, selfieMode: false });
+    await seg.initialize();
+    return seg;
+  })().catch(e => { segPromise = null; throw e; });
+  return segPromise;
+}
+function needsMask() { return state.maskMode === 'auto' && (state.bg.mode !== 'none' || state.skin || state.light || state.fx.tilt); }
+async function detectMaskFor(prev) { // devuelve {w,h,d} o null si no hay persona
+  const seg = await getSegmenter();
+  const res = await Promise.race([
+    new Promise((resolve, reject) => { seg.onResults(resolve); seg.send({ image: prev }).catch(reject); }),
+    new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 40000))]);
+  const w = prev.width, h = prev.height;
+  const mc = document.createElement('canvas'); mc.width = w; mc.height = h;
+  const x = mc.getContext('2d', { willReadFrequently: true }); x.drawImage(res.segmentationMask, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h).data, n = w * h, raw = new Float32Array(n);
+  let alphaVaries = false; for (let i = 3; i < d.length; i += 400) if (d[i] < 250) { alphaVaries = true; break; }
+  for (let i = 0; i < n; i++) raw[i] = (alphaVaries ? d[i * 4 + 3] : d[i * 4]) / 255;
+  const pd = prev.getContext('2d').getImageData(0, 0, w, h).data, L = new Float32Array(n);
+  for (let i = 0; i < n; i++) L[i] = (.299 * pd[i * 4] + .587 * pd[i * 4 + 1] + .114 * pd[i * 4 + 2]) / 255;
+  const q = guided(L, raw, w, h, Math.max(4, Math.round(Math.max(w, h) / 110)), 1e-3);
+  const m = new Float32Array(n); let cov = 0;
+  for (let i = 0; i < n; i++) { m[i] = clamp01((q[i] - .2) / .6); cov += m[i]; }
+  return cov / n < .01 ? null : { w, h, d: m };
+}
+async function ensureMask() {
+  if (maskBase || detecting || !prevSrc) return;
+  detecting = true; toast('Detectando a la persona…', 0);
+  try {
+    const mb = await detectMaskFor(prevSrc);
+    if (!mb) { toast('No encontré una persona. Tocá la foto para marcarla a mano.', 4500); state.maskMode = 'manual'; startTap('focus'); buildPanel(); }
+    else { maskBase = mb; maskCache = {}; toast('¡Persona detectada!', 1500); }
+  } catch (e) {
+    console.warn(e);
+    toast('La detección automática no está disponible. Tocá a la persona para marcarla.', 4500);
+    state.maskMode = 'manual'; startTap('focus'); buildPanel();
+  }
+  detecting = false; requestRender(false);
+}
+
+/* ---------- Programación del render y vista ---------- */
+let pend = false, pendFast = false, idleT = null, lastFull = true;
+function requestRender(fast) {
+  pendFast = fast; if (!pend) { pend = true; requestAnimationFrame(doRender); }
+  clearTimeout(idleT); if (fast) idleT = setTimeout(() => requestRender(false), 280);
+}
+function doRender() {
+  pend = false; if (!prevSrc) return;
+  if (needsMask() && !maskBase) ensureMask();
+  const [w, h] = pendFast ? fitSize(prevSrc.width, prevSrc.height, FAST_MAX) : [prevSrc.width, prevSrc.height];
+  lastOut = render(prevSrc, w, h); lastFull = !pendFast;
+  drawView(lastOut);
+  if (curTab === 'print') updatePrintPreview();
+}
+let histOn = true;
+function drawHisto(c) {
+  const H = $('#histo'); if (!H) return; H.style.display = histOn && prevSrc ? 'block' : 'none'; if (!histOn) return;
+  const sw = Math.min(c.width, 320), sh = Math.round(c.height * sw / c.width);
+  const t = document.createElement('canvas'); t.width = sw; t.height = sh; t.getContext('2d').drawImage(c, 0, 0, sw, sh);
+  const d = t.getContext('2d').getImageData(0, 0, sw, sh).data, hr = new Float32Array(64), hg = new Float32Array(64), hb = new Float32Array(64);
+  for (let i = 0; i < d.length; i += 4) { hr[d[i] >> 2]++; hg[d[i + 1] >> 2]++; hb[d[i + 2] >> 2]++; }
+  let mx = 1; for (let i = 1; i < 63; i++) mx = Math.max(mx, hr[i], hg[i], hb[i]);
+  const x = H.getContext('2d'), W = H.width, Hh = H.height; x.globalCompositeOperation = 'source-over'; x.fillStyle = '#1b1b1b'; x.fillRect(0, 0, W, Hh);
+  x.globalCompositeOperation = 'screen';
+  [[hr, 'rgba(220,60,60,.8)'], [hg, 'rgba(60,190,80,.8)'], [hb, 'rgba(60,110,235,.8)']].forEach(([h, col]) => {
+    x.fillStyle = col; x.beginPath(); x.moveTo(0, Hh);
+    for (let i = 0; i < 64; i++) x.lineTo(i / 63 * W, Hh - Math.min(1, h[i] / mx) * (Hh - 4));
+    x.lineTo(W, Hh); x.closePath(); x.fill();
+  });
+  x.globalCompositeOperation = 'source-over';
+}
+document.addEventListener('click', e => { if (e.target.id === 'histo') { histOn = false; e.target.style.display = 'none'; toast('Histograma oculto. Volvé a mostrarlo en Ajustes.', 2000); } });
+function drawView(c) {
+  if (lastFull) drawHisto(c);
+  const v = $('#view'); if (v.width !== prevSrc.width || v.height !== prevSrc.height) { v.width = prevSrc.width; v.height = prevSrc.height; }
+  const x = v.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(c, 0, 0, v.width, v.height);
+  drawMarkers(x, v.width, v.height);
+}
+function drawMarkers(x, w, h) {
+  if (tapMode === 'smile' || (curTab === 'portrait' && state.smile.pts.length && tapMode)) {
+    for (const p of state.smile.pts) {
+      x.beginPath(); x.arc(p.x * w, p.y * h, Math.max(6, w / 120), 0, Math.PI * 2);
+      x.fillStyle = 'rgba(255,61,127,.85)'; x.fill(); x.lineWidth = 2; x.strokeStyle = '#fff'; x.stroke();
+    }
+  }
+  if (tapMode === 'focus' && state.manual) {
+    const mm = state.manual, rx = mm.s * Math.min(w, h) * .5;
+    x.save(); x.setLineDash([8, 6]); x.lineWidth = 2.5; x.strokeStyle = '#ff3d7f';
+    x.beginPath(); x.ellipse(mm.x * w, mm.y * h, rx, rx * 1.35, 0, 0, Math.PI * 2); x.stroke(); x.restore();
+  }
+}
+function busy(on) { $('#busy').style.display = on ? 'flex' : 'none'; }
+let toastT;
+function toast(msg, ms = 2200) { const t = $('#toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(toastT); if (ms) toastT = setTimeout(() => t.style.display = 'none', ms); }
+function hint(msg) { const t = $('#hint'); if (msg) { t.textContent = msg; t.style.display = 'block'; } else t.style.display = 'none'; }
+
+/* ---------- Historial ---------- */
+function snap() { return JSON.stringify(state); }
+function pushHistory() { redoStack = []; hist.push(lastSnap); if (hist.length > 1000) hist.shift(); lastSnap = snap(); updateUndo(); }
+let lastSnap = snap();
+function updateUndo() { $('#bUndo').disabled = !hist.length; const r = $('#bRedo'); if (r) r.disabled = !redoStack.length; }
+function redo() {
+  if (!redoStack.length) return;
+  hist.push(snap());
+  const nx = JSON.parse(redoStack.pop()), rotChanged = nx.rot !== state.rot || nx.flip !== state.flip;
+  state = nx; lastSnap = snap(); updateUndo();
+  if (rotChanged) buildSources();
+  buildPanel(); requestRender(false);
+}
+function undo() {
+  if (!hist.length) return;
+  redoStack.push(snap());
+  const prev = JSON.parse(hist.pop()), rotChanged = prev.rot !== state.rot || prev.flip !== state.flip;
+  state = prev; lastSnap = snap(); updateUndo();
+  if (rotChanged) buildSources();
+  buildPanel(); requestRender(false);
+}
+function commit() { pushHistory(); requestRender(false); }
+
+/* ---------- Toques sobre la foto ---------- */
+function startTap(mode) {
+  tapMode = mode;
+  if (mode === 'smile') hint(state.smile.pts.length < 2 ? (state.smile.pts.length ? 'Ahora tocá la otra comisura' : 'Tocá una comisura de la boca') : null);
+  else if (mode === 'focus') hint('Tocá el centro de la persona');
+  else hint(null);
+  if (lastOut) drawView(lastOut);
+}
+$('#view').addEventListener('pointerdown', e => {
+  if (!tapMode) return;
+  const r = e.target.getBoundingClientRect(), p = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+  if (tapMode === 'smile') {
+    if (state.smile.pts.length >= 2) state.smile.pts = [];
+    state.smile.pts.push(p);
+    if (state.smile.pts.length === 2) { hint(null); tapMode = null; commit(); buildPanel(); toast('Listo. Ajustá la intensidad de la sonrisa.'); }
+    else { hint('Ahora tocá la otra comisura'); drawView(lastOut); }
+  } else if (tapMode === 'focus') {
+    state.manual = { x: p.x, y: p.y, s: state.manual ? state.manual.s : .5 };
+    state.maskMode = 'manual'; hint(null); commit(); buildPanel();
+  }
+});
+
+/* ---------- Miniaturas de looks ---------- */
+let thumbsDirty = true, thumbBase = null;
+function renderThumbs() {
+  if (!prevSrc || !thumbsDirty) return; thumbsDirty = false;
+  const [tw, th] = fitSize(prevSrc.width, prevSrc.height, 150);
+  thumbBase = document.createElement('canvas'); thumbBase.width = tw; thumbBase.height = th;
+  thumbBase.getContext('2d').drawImage(prevSrc, 0, 0, tw, th);
+  const base = thumbBase.getContext('2d').getImageData(0, 0, tw, th).data, n = tw * th;
+  document.querySelectorAll('.pre').forEach(el => {
+    const st = { ...state, preset: el.dataset.id, presetAmt: 100, fx: { ...DEF_FX } };
+    const E = effective(st); E.vig = 0; E.grain = 0;
+    const R = new Float32Array(n), G = new Float32Array(n), B = new Float32Array(n);
+    for (let i = 0; i < n; i++) { R[i] = base[i * 4] / 255; G[i] = base[i * 4 + 1] / 255; B[i] = base[i * 4 + 2] / 255; }
+    colorStage(R, G, B, tw, th, E);
+    const c = el.querySelector('canvas'); c.width = tw; c.height = th;
+    const x = c.getContext('2d'), img = x.createImageData(tw, th);
+    for (let i = 0; i < n; i++) { img.data[i * 4] = R[i] * 255; img.data[i * 4 + 1] = G[i] * 255; img.data[i * 4 + 2] = B[i] * 255; img.data[i * 4 + 3] = 255; }
+    x.putImageData(img, 0, 0);
+  });
+}
+
+/* ---------- Interfaz estilo Lightroom: barra de herramientas y paneles ---------- */
+const sv = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const ICON = {
+  color: '<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>',
+  auto: '<path d="M4 20L15 9"/><path d="M15 4v2M15 12v2M11 8h2M17 8h2"/><path d="M19.5 3.5l-1 1M10.5 3.5l1 1M19.5 12.5l-1-1"/>',
+  luz: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+  col: '<path d="M12 3c3.5 4.2 6 7.4 6 10.5A6 6 0 0 1 6 13.5C6 10.4 8.5 7.2 12 3z"/><path d="M9 14a3 3 0 0 0 3 3"/>',
+  efx: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18" fill="currentColor" opacity=".25"/><circle cx="12" cy="12" r="4"/>',
+  det: '<path d="M12 3l9 16H3z"/><path d="M12 9l4 7H8z"/>',
+  bg: '<circle cx="12" cy="9" r="3"/><path d="M6.5 20c.7-3.2 3-5 5.5-5s4.8 1.8 5.5 5"/><circle cx="4" cy="5" r="1.2"/><circle cx="20" cy="6" r="1.6"/><circle cx="19" cy="15" r="1"/><circle cx="4.5" cy="14" r="1.4"/>',
+  portrait: '<circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r=".7"/><circle cx="15" cy="10" r=".7"/><path d="M8.5 14.5c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8"/>',
+  geo: '<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/>',
+  print: '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>'
+};
+const TABS = [['color', 'Perfiles'], ['auto', 'Auto'], ['luz', 'Luz'], ['col', 'Color'], ['efx', 'Efectos'], ['det', 'Detalle'], ['bg', 'Desenfoque'], ['portrait', 'Retoque'], ['geo', 'Recortar'], ['print', 'Imprimir']];
+let curTab = 'luz';
+$('#nav').innerHTML = TABS.map(([id, l]) => `<button data-tab="${id}">${sv(ICON[id])}${l}</button>`).join('');
+$('#nav').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.tab === 'auto') { toggleAuto(); return; }
+  curTab = b.dataset.tab; if (tapMode) startTap(null); buildPanel();
+  if (curTab === 'print') updatePrintPreview();
+});
+function toggleAuto() {
+  if (!prevSrc) return;
+  state.enhance = !state.enhance; commit(); buildPanel();
+  toast(state.enhance ? '✨ Auto: luz, color y nitidez ajustados' : 'Auto desactivado', 1800);
+}
+
+const TRK_SPECIAL = {
+  'adj.temp': 'linear-gradient(90deg,#3b78d8,#9aa7b4 50%,#e2c044)',
+  'adj.tint': 'linear-gradient(90deg,#3fa64a,#9a9a9a 50%,#c548c0)',
+  'adj.vibrance': 'linear-gradient(90deg,#8a8a8a,#8a8a8a 50%,#e0457a 70%,#45a5e0 85%,#e0c845)',
+  'adj.saturation': 'linear-gradient(90deg,#8a8a8a,#8a8a8a 50%,#e0457a 70%,#45a5e0 85%,#e0c845)'
+};
+function trackFor(path, min, max, val) { return TRK_SPECIAL[path] || trk(min, max, val); }
+function slider(key, label, min, max, val, path) {
+  const v = val > 0 && min < 0 ? '+' + val : val;
+  return `<div class="sl"><div class="top"><span class="lab" data-reset="${path}">${label}</span><span class="val">${v}</span></div><input type="range" min="${min}" max="${max}" value="${val}" data-path="${path}" style="--trk:${trackFor(path, min, max, val)}"></div>`;
+}
+function trk(min, max, val) { // relleno azul desde el centro (o desde la izquierda)
+  const pos = (val - min) / (max - min) * 100, c = min < 0 ? 50 : 0, a = Math.min(pos, c), b = Math.max(pos, c);
+  return `linear-gradient(90deg,#4a4a4a ${a}%,#378ef0 ${a}%,#378ef0 ${b}%,#4a4a4a ${b}%)`;
+}
+function getPath(p) { return p.split('.').reduce((o, k) => o[k], state); }
+function setPath(p, v) { const ks = p.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], state)[last] = v; }
+const ptitle = (t, auto) => `<div class="ptitle"><b>${t}</b>${auto ? `<button class="autob ${state.enhance ? 'on' : ''}" data-act="auto">AUTO</button>` : ''}</div>`;
+
+function buildPanel() {
+  document.querySelectorAll('#nav button').forEach(b => { b.classList.toggle('act', b.dataset.tab === curTab); if (b.dataset.tab === 'auto') b.classList.toggle('on', !!state.enhance); });
+  const P = $('#panel'); P.classList.toggle('tall', ['print', 'bg', 'color', 'luz', 'efx'].includes(curTab));
+  if (!prevSrc) { P.innerHTML = '<p class="note" style="text-align:center;margin-top:40px">Abrí una o varias fotos para empezar</p>'; return; }
+  const a = state.adj;
+  let h = '';
+  if (curTab === 'color') {
+    h += ptitle('Perfiles y ajustes preestablecidos');
+    h += `<div class="strip">${PRESETS.map(p => `<button class="pre ${state.preset === p.id ? 'act' : ''}" data-id="${p.id}"><canvas></canvas><span>${p.n}</span></button>`).join('')}</div>`;
+    h += slider('', 'Cantidad', 0, 100, state.presetAmt, 'presetAmt');
+    h += recipesHTML();
+  } else if (curTab === 'luz') {
+    h += ptitle('Luz', true) +
+      slider('', 'Exposición', -100, 100, a.exposure, 'adj.exposure') + slider('', 'Contraste', -100, 100, a.contrast, 'adj.contrast') +
+      slider('', 'Iluminaciones', -100, 100, a.highlights, 'adj.highlights') + slider('', 'Sombras', -100, 100, a.shadows, 'adj.shadows') +
+      slider('', 'Blancos', -100, 100, a.whites, 'adj.whites') + slider('', 'Negros', -100, 100, a.blacks, 'adj.blacks');
+  } else if (curTab === 'col') {
+    h += ptitle('Color', true) +
+      slider('', 'Temperatura', -100, 100, a.temp, 'adj.temp') + slider('', 'Matiz', -100, 100, a.tint, 'adj.tint') +
+      slider('', 'Intensidad', -100, 100, a.vibrance, 'adj.vibrance') + slider('', 'Saturación', -100, 100, a.saturation, 'adj.saturation');
+  } else if (curTab === 'efx') {
+    const f = state.fx;
+    h += ptitle('Efectos') +
+      slider('', 'Claridad', -100, 100, a.clarity, 'adj.clarity') + slider('', 'Neblina (bruma)', 0, 100, f.haze, 'fx.haze') +
+      slider('', 'Viñeta', 0, 100, f.vignette, 'fx.vignette') + slider('', 'Grano', 0, 100, f.grain, 'fx.grain') +
+      slider('', 'Brillo soñado', 0, 100, f.glow, 'fx.glow') + slider('', 'HDR', 0, 100, f.hdr, 'fx.hdr') +
+      slider('', 'Luz cálida', 0, 100, f.leak, 'fx.leak') + slider('', 'Destello solar', 0, 100, f.flare, 'fx.flare') +
+      slider('', 'Miniatura', 0, 100, f.tilt, 'fx.tilt');
+  } else if (curTab === 'det') {
+    h += ptitle('Detalle') + slider('', 'Nitidez', 0, 100, a.sharpen, 'adj.sharpen') + slider('', 'Reducción de ruido', 0, 100, a.denoise || 0, 'adj.denoise');
+    h += `<p class="note">Tip: tocá dos veces el nombre de un ajuste para volverlo a cero.</p>`;
+  } else if (curTab === 'geo') {
+    h += ptitle('Recortar y girar') + `<div class="btnrow"><button class="btn" data-act="rotl">⟲ Girar a la izquierda</button><button class="btn" data-act="rotr">⟳ Girar a la derecha</button><button class="btn" data-act="flip">⇋ Espejar</button></div><p class="note">El recorte para cada tamaño de papel se elige en Imprimir.</p>`;
+  } else if (curTab === 'bg') {
+    const b = state.bg;
+    h += ptitle('Desenfoque de lente y fondo');
+    const modes = [['none', '⊘', 'Ninguno'], ['retrato', '👤', 'Desenfocar fondo'], ['tele', '🔭', 'Teleobjetivo'], ['difuminar', '🌫️', 'Difuminar'], ['colorpop', '🎨', 'Color pop'], ['oscuro', '🌑', 'Fondo oscuro'], ['estudio', '🖼️', 'Fondo estudio']];
+    h += `<div class="cards">${modes.map(([id, ic, l]) => `<button class="card ${b.mode === id ? 'act' : ''}" data-bg="${id}"><i>${ic}</i>${l}</button>`).join('')}</div>`;
+    if (b.mode !== 'none') {
+      if (b.mode === 'tele') h += `<div class="chips">${[85, 135, 200].map(l => `<button class="chip ${b.lens === l ? 'act' : ''}" data-lens="${l}">${l} mm</button>`).join('')}</div>`;
+      if (b.mode === 'estudio') h += `<div class="chips">${['#ffffff', '#ecebe8', '#8d9096', '#2b2c30', '#f6dfe4', '#dcecf7', '#f4ead3'].map(c => `<button class="swatch ${b.studio === c ? 'act' : ''}" data-studio="${c}" style="background:${c}"></button>`).join('')}</div>`;
+      h += slider('', b.mode === 'estudio' ? 'Degradé' : 'Cantidad de desenfoque', 0, 100, b.amt, 'bg.amt') + slider('', 'Borde suave', 0, 100, b.feather, 'bg.feather');
+    }
+    h += `<div class="grp">Sujeto</div><div class="chips"><button class="chip ${state.maskMode === 'auto' ? 'act' : ''}" data-mask="auto">🤖 Detectar persona</button><button class="chip ${state.maskMode === 'manual' ? 'act' : ''}" data-mask="manual">👆 Marcar a mano</button></div>`;
+    if (state.maskMode === 'manual') h += `<p class="note">Tocá la foto sobre la persona y ajustá el tamaño del óvalo.</p>` + slider('', 'Tamaño', 15, 100, Math.round((state.manual ? state.manual.s : .5) * 100), 'manual.s');
+  } else if (curTab === 'portrait') {
+    const s = state.smile;
+    h += ptitle('Retoque de retrato');
+    h += `<div class="grp">😊 Sonrisa suave</div><p class="note">Tocá <b>Marcar boca</b> y después las dos comisuras (las puntas de la boca). La app levanta apenas las comisuras para una sonrisa leve y natural.</p>`;
+    h += `<div class="btnrow"><button class="btn primary" data-act="smile">${s.pts.length === 2 ? 'Volver a marcar' : 'Marcar boca'}</button>${s.pts.length ? '<button class="btn" data-act="nosmile">Quitar</button>' : ''}</div>`;
+    if (s.pts.length === 2) h += slider('', 'Sonrisa', 0, 100, s.amt, 'smile.amt');
+    h += `<div class="grp">Piel y luz</div>` + slider('', 'Piel suave', 0, 100, state.skin, 'skin') + slider('', 'Destacar persona', 0, 100, state.light, 'light');
+  } else if (curTab === 'print') {
+    h += printPanel();
+  }
+  P.innerHTML = h;
+  if (curTab === 'color') { thumbsDirty = true; setTimeout(renderThumbs, 10); }
+  if (curTab === 'print') updatePrintPreview();
+}
+let selFx = 'glow';
+const openSecs = { luz: true, color: false, detalle: false, geo: false };
+document.addEventListener('toggle', e => { const d = e.target; if (d.dataset && d.dataset.sec) openSecs[d.dataset.sec] = d.open; }, true);
+
+$('#panel').addEventListener('input', e => {
+  const t = e.target;
+  if (t.type === 'range') {
+    let v = +t.value; const vl = t.parentElement.querySelector('.val'); if (vl) vl.textContent = (v > 0 && +t.min < 0 ? '+' : '') + v; t.style.setProperty('--trk', trackFor(t.dataset.path, +t.min, +t.max, v));
+    if (t.dataset.path === 'manual.s') { if (!state.manual) state.manual = { x: .5, y: .45, s: .5 }; v = v / 100; }
+    setPath(t.dataset.path, v);
+    if (t.dataset.path.startsWith('fx.')) { const c = document.querySelector(`[data-fx="${selFx}"]`); if (c) c.classList.toggle('on', v > 0); }
+    if (t.dataset.path.startsWith('print')) { updatePrintPreview(); return; }
+    requestRender(true);
+  } else if (t.dataset.print) { state.print[t.dataset.print] = t.value; updatePrintPreview(); }
+});
+let lastTapReset = { p: null, t: 0 };
+$('#panel').addEventListener('click', e => {
+  const l = e.target.closest('[data-reset]'); if (!l) return;
+  const now = Date.now(), p = l.dataset.reset;
+  if (lastTapReset.p === p && now - lastTapReset.t < 400) {
+    const inp = l.closest('.sl').querySelector('input'); const def = p === 'presetAmt' ? 100 : p === 'manual.s' ? 50 : p === 'bg.amt' ? 60 : p === 'bg.feather' ? 30 : p === 'smile.amt' ? 50 : 0;
+    inp.value = def; inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true })); toast(l.textContent + ' restablecido', 1200);
+  }
+  lastTapReset = { p, t: now };
+});
+$('#panel').addEventListener('change', e => {
+  const t = e.target;
+  if (t.type === 'range') { pushHistory(); requestRender(false); if (curTab === 'adj' || curTab === 'portrait') thumbsDirty = true; }
+  if (t.dataset.print) { pushHistory(); if (['size', 'sheet'].includes(t.dataset.print)) { buildPanel(); } }
+});
+$('#panel').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const d = b.dataset;
+  if (d.id) { state.preset = d.id; commit(); document.querySelectorAll('.pre').forEach(x => x.classList.toggle('act', x.dataset.id === d.id)); }
+  else if (d.bg) { state.bg.mode = d.bg; if (d.bg !== 'none' && state.maskMode === 'manual' && !state.manual) startTap('focus'); commit(); buildPanel(); }
+  else if (d.lens) { state.bg.lens = +d.lens; commit(); buildPanel(); }
+  else if (d.studio) { state.bg.studio = d.studio; commit(); buildPanel(); }
+  else if (d.mask) {
+    state.maskMode = d.mask;
+    if (d.mask === 'manual') { startTap('focus'); if (!state.manual) state.manual = null; }
+    else startTap(null);
+    maskCache = {}; commit(); buildPanel();
+  }
+  else if (d.fx) { selFx = d.fx; if (!state.fx[d.fx]) { state.fx[d.fx] = 50; commit(); } buildPanel(); }
+  else if (d.act === 'rotl' || d.act === 'rotr') { state.rot = (state.rot + (d.act === 'rotr' ? 90 : 270)) % 360; state.smile.pts = []; state.manual = null; pushHistory(); buildSources(); requestRender(false); }
+  else if (d.act === 'flip') { state.flip = !state.flip; state.smile.pts = []; state.manual = null; pushHistory(); buildSources(); requestRender(false); }
+  else if (d.act === 'auto') toggleAuto();
+  else if (d.act === 'histo') { histOn = !histOn; if (lastOut) drawHisto(lastOut); }
+  else if (d.act === 'resetadj') { state.adj = { ...DEF_ADJ }; commit(); buildPanel(); }
+  else if (d.act === 'smile') { state.smile.pts = []; startTap('smile'); }
+  else if (d.act === 'nosmile') { state.smile.pts = []; startTap(null); commit(); buildPanel(); }
+  else if (d.pset) { state.print[d.pset] = d.v; pushHistory(); buildPanel(); }
+  else if (d.rec) recipeAction('rec', d.rec);
+  else if (d.act && d.act.startsWith('rec')) recipeAction(d.act);
+  else if (d.act === 'pdf') exportPrint('pdf');
+  else if (d.act === 'pjpg') exportPrint('jpg');
+});
+
+/* ---------- Botones principales ---------- */
+document.querySelectorAll('.filein').forEach(inp => inp.addEventListener('change', e => {
+  const fs = Array.from(e.target.files || []);
+  if (fs.length > 1) { fs.forEach(f => batchFiles.push({ file: f, url: URL.createObjectURL(f), done: false })); openBatch(); toast(fs.length + ' fotos cargadas en el lote'); }
+  else if (fs.length === 1) { toast('Abriendo foto…', 0); openFile(fs[0]); }
+  else toast('No llegó ninguna foto');
+  setTimeout(() => { e.target.value = ''; }, 800);
+}));
+$('#bUndo').onclick = undo;
+$('#magic').onclick = () => {
+  state.enhance = !state.enhance; commit(); buildPanel();
+  if (state.enhance) toast('✨ Luz, color y nitidez mejorados');
+};
+const bb = $('#bBefore');
+const showBefore = on => {
+  if (!prevSrc) return; $('#beforeTag').style.display = on ? 'block' : 'none';
+  const v = $('#view'), x = v.getContext('2d');
+  if (on) x.drawImage(prevSrc, 0, 0, v.width, v.height); else if (lastOut) drawView(lastOut);
+};
+bb.addEventListener('pointerdown', e => { e.preventDefault(); showBefore(true); });
+['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => bb.addEventListener(ev, () => showBefore(false)));
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) openFile(e.dataTransfer.files[0]); });
+
+/* ---------- Exportar: alta resolución ---------- */
+async function renderFull() {
+  if (needsMask() && !maskBase) await ensureMask();
+  return render(srcFull, srcFull.width, srcFull.height);
+}
+let dlNS = undefined;
+async function getDownloads() {
+  if (dlNS !== undefined) return dlNS;
+  try { dlNS = window.claude && claude.use ? await claude.use('downloads') : null; } catch (e) { dlNS = null; }
+  return dlNS;
+}
+async function saveBlob(blob, filename, previewCanvas) {
+  const dl = await getDownloads();
+  if (!dl && !window.claude) { // fuera de Claude: descarga directa del navegador
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    toast('Descargado: ' + filename, 3000); return;
+  }
+  if (dl) {
+    try { await dl.save({ filename, data: blob }); toast('Guardado ✔'); return; }
+    catch (e) { if (e && e.code === 'declined') { toast('Guardado cancelado'); return; } console.warn(e); }
+  }
+  if (!previewCanvas && !/\.jpe?g$/.test(filename)) { toast('No se pudo descargar en esta vista. Abrí la app desde Claude en el teléfono o la computadora.', 6000); return; }
+  // Alternativa: mostrar la imagen para guardarla con pulsación larga
+  const url = URL.createObjectURL(filename.endsWith('.pdf') && previewCanvas ? await canvasBlob(previewCanvas, .92) : blob);
+  $('#saveImg').src = url; $('#saveModal').style.display = 'flex';
+  $('#saveTxt').innerHTML = filename.endsWith('.pdf') ? 'No se pudo descargar el PDF aquí. Mantené apretada la imagen y elegí <b>Guardar imagen</b>; se imprime igual en el tamaño elegido.' : 'Mantené apretada la imagen y elegí <b>Guardar imagen</b>.';
+}
+$('#saveClose').onclick = () => $('#saveModal').style.display = 'none';
+function canvasBlob(c, q) { return new Promise(r => c.toBlob(r, 'image/jpeg', q)); }
+$('#bSave').onclick = async () => {
+  busy(true); await new Promise(r => setTimeout(r, 30));
+  try { const c = await renderFull(); const b = await canvasBlob(c, .95); busy(false); await saveBlob(b, fileName + '-riva.jpg', c); }
+  catch (e) { busy(false); console.error(e); toast('No se pudo guardar: ' + e.message, 4000); }
+};
+
+/* ---------- Impresión ---------- */
+const SIZE_GROUPS = [
+  ['Fotos clásicas', { '9x13': ['9×13', 89, 127], '10x15': ['10×15', 102, 152], '13x18': ['13×18', 127, 178], '15x20': ['15×20', 152, 203], '15x21': ['15×21', 150, 210], '18x24': ['18×24', 180, 240], '20x25': ['20×25', 203, 254], '20x30': ['20×30', 200, 300] }],
+  ['Grandes y cuadros', { '24x30': ['24×30', 240, 300], '30x40': ['30×40', 300, 400], '30x45': ['30×45', 300, 450], '40x50': ['40×50', 400, 500], '40x60': ['40×60', 400, 600], '50x70': ['50×70', 500, 700], '60x90': ['60×90', 600, 900] }],
+  ['Carnet y documentos', { 'c3x4': ['3×4 carnet', 30, 40, 1], 'c4x4': ['4×4 DNI / pasaporte AR', 40, 40, 1], 'c35x45': ['3,5×4,5 pasaporte', 35, 45, 1], 'c5x5': ['5×5 visa EE. UU.', 51, 51, 1] }],
+  ['Cuadradas', { '10x10': ['10×10', 102, 102], '15x15': ['15×15', 150, 150], '20x20': ['20×20', 200, 200], '30x30': ['30×30', 300, 300] }],
+  ['Hojas de papel', { 'A6': ['A6', 105, 148], 'A5': ['A5', 148, 210], 'A4': ['A4', 210, 297], 'A3': ['A3', 297, 420], 'carta': ['Carta', 216, 279], 'oficio': ['Oficio', 216, 356] }],
+  ['Instantáneas', { 'mini': ['Instax Mini', 54, 86, 0, { x: 4, y: 6.5, w: 46, h: 62 }], 'square': ['Instax Square', 72, 86, 0, { x: 5, y: 6.5, w: 62, h: 62 }], 'wide': ['Instax Wide', 108, 86, 0, { x: 4.5, y: 6.5, w: 99, h: 62 }], 'polaroid': ['Polaroid', 88, 107, 0, { x: 4.5, y: 5.5, w: 79, h: 79 }] }],
+  ['Otro', { 'custom': ['Personalizado (cm)', 0, 0] }],
+];
+const SIZES = {};
+SIZE_GROUPS.forEach(([g, o]) => Object.entries(o).forEach(([k, v]) => SIZES[k] = { n: v[0], w: v[1], h: v[2], doc: !!v[3], inst: v[4] || null }));
+const SHEETS = { a4: ['Hoja A4', 210, 297, 6], carta: ['Hoja Carta', 216, 279, 6], oficio: ['Hoja Oficio', 216, 356, 6], a3: ['Hoja A3', 297, 420, 6], p10x15: ['Papel foto 10×15', 102, 152, 3], p13x18: ['Papel foto 13×18', 127, 178, 3], p20x30: ['Papel foto 20×30', 200, 300, 4] };
+function sizeDef(key) {
+  const p = state.print; key = key || p.size;
+  if (key === 'custom') {
+    const w = Math.max(1, Math.min(200, parseFloat(String(p.cw || '10').replace(',', '.')) || 10)), h = Math.max(1, Math.min(200, parseFloat(String(p.ch || '15').replace(',', '.')) || 15));
+    return { n: `${String(w).replace('.', ',')}×${String(h).replace('.', ',')} cm`, w: w * 10, h: h * 10, doc: false, inst: null };
+  }
+  return SIZES[key] || SIZES['10x15'];
+}
+function tiler(SW, SH, mar, pw, ph) {
+  const gap = 3;
+  const fit = (w, h) => Math.max(0, Math.floor((SW - 2 * mar + gap) / (w + gap))) * Math.max(0, Math.floor((SH - 2 * mar + gap) / (h + gap)));
+  const rot = fit(ph, pw) > fit(pw, ph);
+  const tw = rot ? ph : pw, th = rot ? pw : ph;
+  const cols = Math.max(0, Math.floor((SW - 2 * mar + gap) / (tw + gap))), rows = Math.max(0, Math.floor((SH - 2 * mar + gap) / (th + gap)));
+  return { tw, th, cols, rows, per: cols * rows, gap, SW, SH, ox: (SW - cols * tw - (cols - 1) * gap) / 2, oy: (SH - rows * th - (rows - 1) * gap) / 2 };
+}
+function sheetTilerFor(key, S) { const sh = SHEETS[key]; if (!sh) return null; const T = tiler(sh[1], sh[2], sh[3], S.w, S.h); return T.per >= 2 ? T : null; }
+function activeSheet() { const k = state.print.sheet; return k && k !== 'single' && sheetTilerFor(k, sizeDef()) ? k : 'single'; }
+function pxPerMM(w, h) { return Math.min(MM, Math.sqrt(15e6 / (w * h))); } // límite seguro de memoria del celular
+function printPanel() {
+  const p = state.print, S = sizeDef(), chip = (k, v, l) => `<button class="chip ${p[k] === v ? 'act' : ''}" data-pset="${k}" data-v="${v}">${l}</button>`;
+  const inst = !!S.inst;
+  let h = `<div class="grp">Tamaño</div><select class="sel" data-print="size">${SIZE_GROUPS.map(([g, o]) => `<optgroup label="${g}">${Object.keys(o).map(k => `<option value="${k}" ${p.size === k ? 'selected' : ''}>${SIZES[k].n}</option>`).join('')}</optgroup>`).join('')}</select>`;
+  if (p.size === 'custom') h += `<div class="row" style="gap:8px;margin-top:8px"><input type="text" inputmode="decimal" data-print="cw" value="${p.cw || '10'}" style="width:80px"> <span>×</span> <input type="text" inputmode="decimal" data-print="ch" value="${p.ch || '15'}" style="width:80px"> <span class="note">cm (ancho × alto)</span></div>`;
+  if (S.doc) h += `<p class="note">Foto de documento: se recorta centrada en la cara. Usá fondo blanco o claro (pestaña Fondo → Fondo estudio) si el trámite lo pide.</p>`;
+  if (!inst) {
+    if (!S.doc) {
+      h += `<div class="grp">Formato</div><div class="chips">${chip('orient', 'auto', 'Automático')}${chip('orient', 'v', 'Vertical')}${chip('orient', 'h', 'Horizontal')}</div>`;
+      h += `<div class="chips">${chip('fit', 'fill', 'Llenar (recorta)')}${chip('fit', 'fit', 'Foto completa')}</div>`;
+      h += `<div class="grp">Marco</div><div class="chips">${chip('frame', 'none', 'Sin marco')}${chip('frame', 'white', 'Borde blanco')}${chip('frame', 'polaroid', 'Estilo instantánea')}</div>`;
+    }
+  }
+  if (inst || (!S.doc && p.frame === 'polaroid')) h += `<input type="text" placeholder="Texto escrito abajo (opcional): nombre, fecha…" value="${(p.caption || '').replace(/"/g, '&quot;')}" data-print="caption">`;
+  const opts = Object.entries(SHEETS).filter(([k]) => sheetTilerFor(k, S));
+  if (opts.length) {
+    const cur = activeSheet();
+    h += `<div class="grp">Hoja</div><select class="sel" data-print="sheet"><option value="single" ${cur === 'single' ? 'selected' : ''}>Una foto por hoja (${S.n})</option>${opts.map(([k, v]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>Varias en ${v[0]} (${sheetTilerFor(k, S).per} copias)</option>`).join('')}</select>`;
+  }
+  h += `<canvas id="printPrev"></canvas><p class="note" id="printInfo" style="text-align:center"></p>`;
+  h += `<div class="btnrow"><button class="btn primary" data-act="pdf">🖨️ PDF para imprimir</button><button class="btn" data-act="pjpg">Guardar JPG</button></div>`;
+  return h;
+}
+const MM = 300 / 25.4;
+function printLayout(photoW, photoH) {
+  const p = state.print, S = sizeDef();
+  let w = S.w, h = S.h;
+  if (!S.inst && !S.doc && w !== h) {
+    const land = p.orient === 'h' || (p.orient === 'auto' && photoW > photoH);
+    if (land !== (w > h)) [w, h] = [h, w];
+  }
+  let box;
+  const frame = S.doc ? 'none' : p.frame;
+  if (S.inst) box = { ...S.inst };
+  else if (frame === 'white') { const b = Math.min(w, h) * .045; box = { x: b, y: b, w: w - 2 * b, h: h - 2 * b }; }
+  else if (frame === 'polaroid') { const s = Math.min(w, h) * .06; box = { x: s, y: s, w: w - 2 * s, h: h - s - Math.min(w, h) * .2 }; }
+  else box = { x: 0, y: 0, w, h };
+  return { w, h, box, framed: !!S.inst || frame !== 'none', cap: !!S.inst || frame === 'polaroid', doc: S.doc };
+}
+function composePrint(photo, scale) { // scale: px por mm
+  const L = printLayout(photo.width, photo.height), p = state.print;
+  scale = Math.min(scale, pxPerMM(L.w, L.h));
+  const c = document.createElement('canvas'); c.width = Math.round(L.w * scale); c.height = Math.round(L.h * scale);
+  const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.imageSmoothingQuality = 'high';
+  const bx = L.box.x * scale, by = L.box.y * scale, bw = L.box.w * scale, bh = L.box.h * scale;
+  const pr = photo.width / photo.height, br = bw / bh;
+  if (p.fit === 'fit' && !sizeDef().inst && !L.doc) {
+    let dw = bw, dh = bw / pr; if (dh > bh) { dh = bh; dw = bh * pr; }
+    x.drawImage(photo, bx + (bw - dw) / 2, by + (bh - dh) / 2, dw, dh);
+  } else {
+    const m = maskBase ? centroid(maskBase.d, maskBase.w, maskBase.h) : { x: .5, y: .45 };
+    let sw = photo.width, sh = photo.height;
+    if (pr > br) sw = sh * br; else sh = sw / br;
+    if (L.doc) { sw *= .82; sh *= .82; } // carnet: más cerca de la cara
+    const sx = Math.min(photo.width - sw, Math.max(0, m.x * photo.width - sw / 2));
+    const sy = Math.min(photo.height - sh, Math.max(0, (L.doc ? m.y - .12 : m.y) * photo.height - sh * .45));
+    x.drawImage(photo, sx, sy, sw, sh, bx, by, bw, bh);
+  }
+  if (L.framed) { x.strokeStyle = 'rgba(0,0,0,.06)'; x.lineWidth = Math.max(1, scale * .2); x.strokeRect(bx, by, bw, bh); }
+  if (L.cap && p.caption) {
+    const bottom = by + bh, avail = c.height - bottom;
+    let fs = avail * .42; x.font = `600 ${fs}px Caveat, cursive`;
+    while (x.measureText(p.caption).width > bw * .95 && fs > 6) { fs *= .92; x.font = `600 ${fs}px Caveat, cursive`; }
+    x.fillStyle = '#2d2d33'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText(p.caption, c.width / 2, bottom + avail * .5);
+  }
+  return { c, w: L.w, h: L.h, dpi: Math.round(scale * 25.4) };
+}
+function newSheetCanvas(T, scale) { const c = document.createElement('canvas'); c.width = Math.round(T.SW * scale); c.height = Math.round(T.SH * scale); const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); return c; }
+function drawSlot(sheet, T, idx, pc, scale) {
+  const x = sheet.getContext('2d'), r = Math.floor(idx / T.cols), k = idx % T.cols;
+  const X = (T.ox + k * (T.tw + T.gap)) * scale, Y = (T.oy + r * (T.th + T.gap)) * scale;
+  const rot = (pc.w > pc.h) !== (T.tw > T.th);
+  x.save(); x.translate(X, Y);
+  if (rot) { x.translate(T.tw * scale, 0); x.rotate(Math.PI / 2); }
+  x.imageSmoothingQuality = 'high'; x.drawImage(pc.c, 0, 0, pc.w * scale, pc.h * scale); x.restore();
+  x.strokeStyle = '#c8c8c8'; x.lineWidth = Math.max(1, scale * .15); x.strokeRect(X, Y, T.tw * scale, T.th * scale);
+}
+function composeSheet(pc, scale) { // varias copias en la hoja elegida, con marcas de corte
+  const T = sheetTilerFor(activeSheet(), sizeDef()); scale = Math.min(scale, pxPerMM(T.SW, T.SH));
+  const c = newSheetCanvas(T, scale);
+  for (let i = 0; i < T.per; i++) drawSlot(c, T, i, pc, scale);
+  return { c, w: T.SW, h: T.SH, count: T.per, dpi: Math.round(scale * 25.4) };
+}
+function updatePrintPreview() {
+  const cv = $('#printPrev'); if (!cv || !lastOut) return;
+  const pc = composePrint(lastOut, 3), sk = activeSheet();
+  const out = sk !== 'single' ? composeSheet(pc, 1.6) : pc;
+  cv.width = out.c.width; cv.height = out.c.height; cv.getContext('2d').drawImage(out.c, 0, 0);
+  const S = sizeDef(), d = pxPerMM(pc.w, pc.h) * 25.4;
+  $('#printInfo').textContent = sk !== 'single' ? `${out.count} copias de ${S.n} en ${SHEETS[sk][0]} · imprimir al 100% (tamaño real)` : `${S.n} · ${Math.round(pc.w)}×${Math.round(pc.h)} mm · ${Math.round(Math.min(300, d))} dpi · imprimir al 100%`;
+}
+let pdfLoaded = null;
+function loadPDF() { if (window.jspdf) return Promise.resolve(); if (!pdfLoaded) pdfLoaded = loadScript('lib/jspdf.umd.min.js').catch(e => { pdfLoaded = null; throw e; }); return pdfLoaded; }
+async function exportPrint(kind) {
+  busy(true); await new Promise(r => setTimeout(r, 30));
+  try {
+    try { await document.fonts.load('600 40px Caveat'); } catch (e) { }
+    const full = await renderFull();
+    const pc = composePrint(full, MM);
+    const sk = activeSheet(), out = sk !== 'single' ? composeSheet(pc, MM) : pc;
+    const base = `${fileName}-${sizeDef().n.replace(/[^\w]+/g, '')}${sk !== 'single' ? '-' + sk : ''}`;
+    if (kind === 'pdf') {
+      await loadPDF();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: [out.w, out.h], orientation: out.w > out.h ? 'l' : 'p', compress: true });
+      doc.addImage(out.c.toDataURL('image/jpeg', .93), 'JPEG', 0, 0, out.w, out.h);
+      const blob = doc.output('blob'); busy(false);
+      await saveBlob(blob, base + '.pdf', out.c);
+    } else {
+      const b = await canvasBlob(out.c, .95); busy(false);
+      await saveBlob(b, base + '.jpg', out.c);
+    }
+  } catch (e) { busy(false); console.error(e); toast('Error al preparar la impresión: ' + e.message, 4000); }
+}
+
+
+/* ---------- Mis ediciones (recetas guardadas) ---------- */
+const RKEY = 'riva-pro-recetas-v1';
+let recipes = [], autoRecipe = null, selRecipe = null;
+try { const o = JSON.parse(localStorage.getItem(RKEY) || '{}'); recipes = o.list || []; autoRecipe = o.auto || null; } catch (e) { }
+function saveRecipes() { try { localStorage.setItem(RKEY, JSON.stringify({ list: recipes, auto: autoRecipe })); return true; } catch (e) { toast('Este navegador no deja guardar ediciones', 4000); return false; } }
+function recipeFrom(st) {
+  return JSON.parse(JSON.stringify({ enhance: st.enhance, preset: st.preset, presetAmt: st.presetAmt, adj: st.adj, fx: st.fx, bg: st.bg, skin: st.skin, light: st.light, print: st.print }));
+}
+function applyRecipe(st, r) {
+  const c = JSON.parse(JSON.stringify(r.cfg));
+  Object.assign(st, c); st.adj = { ...DEF_ADJ, ...c.adj }; st.fx = { ...DEF_FX, ...c.fx };
+  st.maskMode = 'auto'; st.manual = null;
+  return st;
+}
+function recipesHTML() {
+  let h = `<div class="grp">⚡ Mis ediciones</div>`;
+  if (!recipes.length) h += `<p class="note">Guardá la edición que armaste (estilo, ajustes, efectos, fondo e impresión) para usarla con un toque, o para que se aplique sola a cada foto que abras.</p>`;
+  else h += `<div class="chips">${recipes.map(r => `<button class="chip ${selRecipe === r.id ? 'act' : ''}" data-rec="${r.id}">${autoRecipe === r.id ? '⚡ ' : ''}${escapeH(r.name)}</button>`).join('')}</div>`;
+  const r = recipes.find(x => x.id === selRecipe);
+  if (r) h += `<div class="btnrow"><button class="btn primary" data-act="recapply">Aplicar</button><button class="btn" data-act="recauto">${autoRecipe === r.id ? '⚡ Quitar automática' : '⚡ Aplicar sola al abrir fotos'}</button><button class="btn" data-act="recupd">Actualizar con lo actual</button><button class="btn" data-act="recdel">🗑️</button></div>`;
+  h += `<div class="row" style="gap:8px"><input type="text" id="recName" placeholder="Nombre (ej.: Jardín luminoso)" maxlength="30"><button class="btn primary" data-act="recsave" style="white-space:nowrap">＋ Guardar</button></div>`;
+  return h;
+}
+function escapeH(t) { return String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function recipeAction(act, id) {
+  const r = recipes.find(x => x.id === (id || selRecipe));
+  if (act === 'rec') { selRecipe = selRecipe === id ? null : id; buildPanel(); return; }
+  if (act === 'recsave') {
+    const name = ($('#recName').value || '').trim() || ('Edición ' + (recipes.length + 1));
+    const nr = { id: 'r' + Date.now(), name, cfg: recipeFrom(state) };
+    recipes.push(nr); selRecipe = nr.id;
+    if (saveRecipes()) toast('Edición «' + name + '» guardada'); buildPanel(); return;
+  }
+  if (!r) return;
+  if (act === 'recapply') { applyRecipe(state, r); commit(); buildPanel(); toast('Aplicada: ' + r.name); }
+  else if (act === 'recauto') { autoRecipe = autoRecipe === r.id ? null : r.id; saveRecipes(); buildPanel(); toast(autoRecipe ? '⚡ «' + r.name + '» se aplicará sola a cada foto que abras' : 'Ya no se aplica sola'); }
+  else if (act === 'recupd') { r.cfg = recipeFrom(state); saveRecipes(); toast('«' + r.name + '» actualizada'); }
+  else if (act === 'recdel') { recipes = recipes.filter(x => x !== r); if (autoRecipe === r.id) autoRecipe = null; selRecipe = null; saveRecipes(); buildPanel(); }
+}
+
+/* ---------- Edición en lote ---------- */
+let batchFiles = [], batchRunning = false, batchRec = 'current';
+function loadImage(file) { return decodeAny(file); }
+function batchState() {
+  const r = recipes.find(x => x.id === batchRec);
+  return r ? applyRecipe(freshState(), r) : state;
+}
+function batchSummary() {
+  const state = batchState();
+  $('#bRecs').innerHTML = `<button class="chip ${batchRec === 'current' ? 'act' : ''}" data-brec="current">La edición actual</button>` + recipes.map(r => `<button class="chip ${batchRec === r.id ? 'act' : ''}" data-brec="${r.id}">${autoRecipe === r.id ? '⚡ ' : ''}${escapeH(r.name)}</button>`).join('');
+  const pr = PRESETS.find(p => p.id === state.preset) || PRESETS[0];
+  const adjN = Object.keys(DEF_ADJ).filter(k => state.adj[k]).length;
+  const FXN = { glow: 'Brillo soñado', hdr: 'HDR', vignette: 'Viñeta', grain: 'Grano', leak: 'Luz cálida', flare: 'Destello', haze: 'Bruma', tilt: 'Miniatura' };
+  const fx = Object.keys(state.fx).filter(k => state.fx[k]).map(k => FXN[k]);
+  const BGN = { none: 'sin cambios', retrato: 'desenfocado', tele: 'teleobjetivo ' + state.bg.lens + ' mm', difuminar: 'difuminado', colorpop: 'color pop', oscuro: 'oscuro', estudio: 'de estudio' };
+  const S = sizeDef(), sk = activeSheet();
+  let h = `<b>Se aplica a todas:</b><br>🎨 Estilo: ${pr.n}${state.preset !== 'original' ? ' (' + state.presetAmt + '%)' : ''}<br>`;
+  h += `🎚️ Ajustes: ${adjN ? adjN + ' modificados' : 'sin cambios'}<br>✨ Efectos: ${fx.length ? fx.join(', ') : 'ninguno'}<br>👤 Fondo: ${BGN[state.bg.mode]}`;
+  if (state.skin || state.light) h += `<br>💆 Retrato: ${[state.skin ? 'piel suave' : '', state.light ? 'destacar persona' : ''].filter(Boolean).join(', ')}`;
+  h += `<br>🖨️ Impresión: ${S.n}, ${sk !== 'single' ? 'varias en ' + SHEETS[sk][0] : 'una por hoja'}${(S.inst || state.print.frame !== 'none') ? ', con marco' : ''}`;
+  h += `<br><span style="color:var(--mut)">Para cambiar algo, cerrá esta ventana y editá con cualquier foto, o elegí una de tus ediciones guardadas. La sonrisa y la selección a mano son de cada foto y no se aplican en lote.</span>`;
+  $('#bsum').innerHTML = h;
+}
+function renderBatchGrid() {
+  $('#bgrid').innerHTML = batchFiles.map((b, i) => `<div class="bt ${b.done ? 'done' : ''}" data-ed="${i}"><img src="${b.url}" alt=""><button data-rm="${i}" aria-label="Quitar">✕</button></div>`).join('');
+  $('#bstat').textContent = batchFiles.length ? `${batchFiles.length} foto${batchFiles.length > 1 ? 's' : ''} lista${batchFiles.length > 1 ? 's' : ''} · tocá una para editarla sola` : 'Todavía no agregaste fotos.';
+}
+$('#bRecs').addEventListener('click', e => { const b = e.target.closest('[data-brec]'); if (!b || batchRunning) return; batchRec = b.dataset.brec; const st = batchState(); $('#bEnh').checked = batchRec === 'current' ? true : !!st.enhance; batchSummary(); });
+function openBatch() { if (!prevSrc && autoRecipe && batchRec === 'current') batchRec = autoRecipe; $('#bEnh').checked = batchRec === 'current' ? true : !!batchState().enhance; batchSummary(); renderBatchGrid(); $('#batch').style.display = 'flex'; }
+$('#bBatch').onclick = openBatch;
+$('#bClose').onclick = () => { if (batchRunning) { toast('Esperá a que termine el lote'); return; } $('#batch').style.display = 'none'; };
+$('#bfiles').addEventListener('change', e => {
+  for (const f of e.target.files) batchFiles.push({ file: f, url: URL.createObjectURL(f), done: false });
+  setTimeout(() => { e.target.value = ''; }, 800); renderBatchGrid();
+});
+$('#bgrid').addEventListener('click', e => {
+  if (batchRunning) return;
+  const b = e.target.closest('[data-rm]');
+  if (b) { batchFiles.splice(+b.dataset.rm, 1); renderBatchGrid(); return; }
+  const t = e.target.closest('[data-ed]');
+  if (t) { $('#batch').style.display = 'none'; openFile(batchFiles[+t.dataset.ed].file); toast('Editando esta foto sola. Volvé al lote con 🗂️'); }
+});
+$('#bClear').onclick = () => { if (batchRunning) return; batchFiles = []; renderBatchGrid(); };
+$('#bZip').onclick = () => runBatch('zip');
+$('#bPdf').onclick = () => runBatch('pdf');
+
+async function runBatch(kind) {
+  if (batchRunning) return;
+  if (!batchFiles.length) { toast('Primero agregá fotos'); return; }
+  batchRunning = true;
+  const prog = $('#bprog'), bar = $('#bbar'), stat = $('#bstat');
+  prog.style.display = 'block'; bar.style.width = '0%';
+  batchFiles.forEach(b => b.done = false); renderBatchGrid();
+  const saved = { state, srcFull, prevSrc, auto, maskBase, maskCache, lastOut };
+  const bst = JSON.parse(JSON.stringify(batchState()));
+  bst.smile.pts = []; bst.maskMode = 'auto'; bst.manual = null; bst.rot = 0; bst.flip = false; bst.enhance = $('#bEnh').checked;
+  const needM = bst.bg.mode !== 'none' || bst.skin || bst.light || bst.fx.tilt;
+  let zip = null, doc = null, T = null, sheet = null, slot = 0, pages = 0, noPerson = 0, failed = 0;
+  const used = {};
+  const addPage = (c, w, h) => {
+    const data = c.toDataURL('image/jpeg', .92), o = w > h ? 'l' : 'p';
+    if (!doc) { const { jsPDF } = window.jspdf; doc = new jsPDF({ unit: 'mm', format: [w, h], orientation: o, compress: true }); }
+    else doc.addPage([w, h], o);
+    doc.addImage(data, 'JPEG', 0, 0, w, h); pages++;
+  };
+  try {
+    if (kind === 'zip') { if (!window.JSZip) await loadScript('lib/jszip.min.js'); zip = new JSZip(); }
+    else { await loadPDF(); try { await document.fonts.load('600 40px Caveat'); } catch (e) { } }
+    for (let i = 0; i < batchFiles.length; i++) {
+      const bf = batchFiles[i];
+      stat.textContent = `Procesando ${i + 1} de ${batchFiles.length}…`;
+      bar.style.width = (i / batchFiles.length * 100) + '%';
+      await new Promise(r => setTimeout(r, 20));
+      let im;
+      try { im = await loadImage(bf.file); } catch (e) { failed++; continue; }
+      state = bst;
+      const S = makeSources(im, 0, false);
+      srcFull = S.full; prevSrc = S.prev; auto = S.auto; maskBase = null; maskCache = {};
+      if (needM || kind === 'pdf') {
+        try { maskBase = await detectMaskFor(prevSrc); } catch (e) { maskBase = null; }
+        if (needM && !maskBase) noPerson++;
+      }
+      const out = render(srcFull, srcFull.width, srcFull.height);
+      let base = (bf.file.name || 'foto').replace(/\.[^.]+$/, '');
+      used[base] = (used[base] || 0) + 1; if (used[base] > 1) base += '-' + used[base];
+      if (zip) {
+        zip.file(base + '-riva.jpg', await canvasBlob(out, .93));
+      } else {
+        const pc = composePrint(out, MM);
+        if (activeSheet() !== 'single') {
+          if (!T) { T = sheetTilerFor(activeSheet(), sizeDef()); T.scale = Math.min(MM, pxPerMM(T.SW, T.SH)); }
+          if (!sheet) sheet = newSheetCanvas(T, T.scale);
+          drawSlot(sheet, T, slot++, pc, T.scale);
+          if (slot >= T.per) { addPage(sheet, T.SW, T.SH); sheet = null; slot = 0; }
+        } else addPage(pc.c, pc.w, pc.h);
+        pc.c.width = 0;
+      }
+      out.width = 0; S.full.width = 0;
+      bf.done = true; renderBatchGrid();
+    }
+    if (sheet) addPage(sheet, T.SW, T.SH);
+    bar.style.width = '100%';
+  } catch (e) {
+    console.error(e); stat.textContent = 'Error: ' + e.message;
+    state = saved.state; srcFull = saved.srcFull; prevSrc = saved.prevSrc; auto = saved.auto; maskBase = saved.maskBase; maskCache = saved.maskCache; lastOut = saved.lastOut;
+    batchRunning = false; return;
+  }
+  state = saved.state; srcFull = saved.srcFull; prevSrc = saved.prevSrc; auto = saved.auto; maskBase = saved.maskBase; maskCache = saved.maskCache; lastOut = saved.lastOut;
+  const done = batchFiles.filter(b => b.done).length;
+  let msg = `Listo: ${done} foto${done !== 1 ? 's' : ''}`;
+  if (kind === 'pdf') msg += ` en ${pages} página${pages !== 1 ? 's' : ''}`;
+  if (noPerson) msg += ` · en ${noPerson} no encontré persona (quedaron sin efecto de fondo)`;
+  if (failed) msg += ` · ${failed} no se pudieron leer`;
+  stat.textContent = msg + '. Guardando…';
+  try {
+    if (zip) {
+      const blob = await zip.generateAsync({ type: 'blob' });
+      await saveBlob(blob, `fotos-riva-${done}.zip`, null);
+    } else if (doc) {
+      await saveBlob(doc.output('blob'), `impresion-riva-${done}fotos.pdf`, null);
+    }
+    stat.textContent = msg + '.';
+  } catch (e) { stat.textContent = 'Error al guardar: ' + e.message; }
+  batchRunning = false;
+}
+
+/* ---------- Versión para la compu ---------- */
+if (window.__RIVA_OFFLINE) { $('#bPC').style.display = 'none'; const b2 = $('#bPC2'); if (b2) b2.parentElement.style.display = 'none'; }
+async function downloadPC() {
+  busy(true);
+  try {
+    const r = await fetch('offline/RivaFotoPro.html'); if (!r.ok) throw new Error('no se encontró el archivo');
+    const blob = await r.blob(); busy(false);
+    await saveBlob(blob, 'RivaFotoPro.html', null);
+    toast('Abrí RivaFotoPro.html con Chrome o Edge: funciona sin internet', 7000);
+  } catch (e) { busy(false); toast('No se pudo descargar: ' + e.message, 5000); }
+}
+$('#bPC').onclick = downloadPC; if ($('#bPC2')) $('#bPC2').onclick = downloadPC;
+
+/* ---------- Menú y rehacer ---------- */
+$('#bRedo').onclick = redo;
+$('#bMenu').onclick = e => { e.stopPropagation(); const m = $('#menu'); m.style.display = m.style.display === 'flex' ? 'none' : 'flex'; };
+document.addEventListener('click', e => { if (!e.target.closest('#menu') && !e.target.closest('#bMenu')) $('#menu').style.display = 'none'; });
+$('#menu').addEventListener('click', () => setTimeout(() => $('#menu').style.display = 'none', 10));
+$('#mPrint').onclick = () => { if (!prevSrc) { toast('Primero abrí una foto'); return; } curTab = 'print'; buildPanel(); };
+$('#mHisto').onclick = () => { histOn = !histOn; if (lastOut) drawHisto(lastOut); else $('#histo').style.display = 'none'; };
+$('#mReset').onclick = () => { if (!prevSrc) return; const keepPrint = state.print, rc = state.rot || state.flip; state = freshState(); if (rc) buildSources(); state.print = keepPrint; maskCache = {}; commit(); buildPanel(); toast('Edición restablecida'); };
+document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); } if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); } });
+
+/* ---------- Instalar como app (ícono en el celular) ---------- */
+let deferredInstall = null;
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; showInstall(); });
+function showInstall() {
+  if (isStandalone() || $('#instBar')) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (!deferredInstall && !ios) return;
+  const b = document.createElement('div'); b.id = 'instBar';
+  b.style.cssText = 'position:fixed;left:10px;right:10px;bottom:calc(76px + env(safe-area-inset-bottom));background:#262626;border:1px solid #3a3a3a;border-radius:12px;padding:12px;z-index:28;display:flex;gap:10px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.5);font-size:13.5px';
+  b.innerHTML = `<img src="icons/icon-192.png" style="width:40px;height:40px;border-radius:9px"><div style="flex:1">${deferredInstall ? '<b>Instalá Riva Foto</b><br><span style="color:#aaa">Queda con su ícono, como una app</span>' : '<b>Instalá Riva Foto</b><br><span style="color:#aaa">Tocá <b>Compartir</b> ⬆️ y después <b>Agregar a inicio</b></span>'}</div>${deferredInstall ? '<button class="btn primary" id="instGo">Instalar</button>' : ''}<button class="ib" id="instX" aria-label="Cerrar">✕</button>`;
+  document.body.appendChild(b);
+  $('#instX').onclick = () => b.remove();
+  if (deferredInstall) $('#instGo').onclick = async () => { deferredInstall.prompt(); await deferredInstall.userChoice; deferredInstall = null; b.remove(); };
+}
+setTimeout(showInstall, 2500);
+const mi = document.createElement('button'); mi.textContent = '📲 Instalar en este dispositivo'; mi.onclick = () => { if (deferredInstall) { deferredInstall.prompt(); } else if (isStandalone()) toast('Ya está instalada ✔'); else toast('En iPhone: Compartir ⬆️ → Agregar a inicio. En Android: menú ⋮ → Instalar app', 6000); };
+$('#menu').insertBefore(mi, $('#menu').firstChild);
+if ('serviceWorker' in navigator && location.protocol === 'https:') { try { navigator.serviceWorker.register('sw.js').catch(() => { }); } catch (e) { } }
+
+buildPanel();
+</script>
+</body>
+</html>
