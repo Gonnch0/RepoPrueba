@@ -1,4 +1,4 @@
-const CACHE='riva-foto-pro-v3';
+const CACHE='riva-foto-pro-v4';
 const FILES=["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "mp/selfie_segmentation.js", "mp/model.txt", "mp/graph.txt", "mp/selfie_segmentation_solution_simd_wasm_bin.js", "mp/selfie_segmentation_solution_simd_wasm_bin.wasm", "lib/jspdf.umd.min.js", "lib/jszip.min.js", "lib/pako.min.js", "lib/UTIF.js", "lib/agpsd.js", "lib/heif.js"];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});

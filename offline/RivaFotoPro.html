@@ -178,7 +178,7 @@ nav button.on svg{stroke:var(--blue)} nav button.on{color:var(--blue)}
     <button id="mHisto">📊 Mostrar u ocultar histograma</button>
     <button id="mReset">↺ Restablecer toda la edición</button>
     <button id="bPC">💻 Descargar para la compu (sin internet)</button>
-    <div style="padding:8px 12px 4px;font-size:11px;color:#777">Riva Foto Pro · versión 3 (estilo Lightroom)</div>
+    <div style="padding:8px 12px 4px;font-size:11px;color:#777">Riva Foto Pro · versión 4 (2 en una A4)</div>
   </div>
   <div id="stage">
     <div id="empty">
@@ -26537,6 +26537,8 @@ const PRESETS = [
 const DEF_ADJ = { exposure: 0, contrast: 0, highlights: 0, shadows: 0, whites: 0, blacks: 0, temp: 0, tint: 0, vibrance: 0, saturation: 0, clarity: 0, sharpen: 0, denoise: 0 };
 const DEF_FX = { vignette: 0, grain: 0, glow: 0, hdr: 0, tilt: 0, leak: 0, flare: 0, haze: 0 };
 let state = freshState();
+function savePrintPref() { try { localStorage.setItem('riva-pro-print', JSON.stringify(state.print)); } catch (e) { } }
+function loadPrintPref() { try { return JSON.parse(localStorage.getItem('riva-pro-print') || 'null'); } catch (e) { return null; } }
 function freshState() {
   return {
     enhance: false, preset: 'original', presetAmt: 100,
@@ -26545,7 +26547,7 @@ function freshState() {
     maskMode: 'auto', manual: null,
     smile: { pts: [], amt: 50 }, skin: 0, light: 0,
     rot: 0, flip: false,
-    print: { size: '10x15', orient: 'auto', fit: 'fill', frame: 'none', caption: '', sheet: 'single', cw: '10', ch: '15' }
+    print: Object.assign({ size: 'a4mitad', orient: 'auto', fit: 'fill', frame: 'none', caption: '', sheet: 'a4', cw: '10', ch: '15' }, (typeof loadPrintPref === 'function' && loadPrintPref()) || {}, { caption: '' })
   };
 }
 let hist = [], redoStack = [];
@@ -27404,7 +27406,7 @@ $('#panel').addEventListener('click', e => {
 $('#panel').addEventListener('change', e => {
   const t = e.target;
   if (t.type === 'range') { pushHistory(); requestRender(false); if (curTab === 'adj' || curTab === 'portrait') thumbsDirty = true; }
-  if (t.dataset.print) { pushHistory(); if (['size', 'sheet'].includes(t.dataset.print)) { buildPanel(); } }
+  if (t.dataset.print) { pushHistory(); savePrintPref(); if (['size', 'sheet'].includes(t.dataset.print)) { buildPanel(); } }
 });
 $('#panel').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
@@ -27427,7 +27429,8 @@ $('#panel').addEventListener('click', e => {
   else if (d.act === 'resetadj') { state.adj = { ...DEF_ADJ }; commit(); buildPanel(); }
   else if (d.act === 'smile') { state.smile.pts = []; startTap('smile'); }
   else if (d.act === 'nosmile') { state.smile.pts = []; startTap(null); commit(); buildPanel(); }
-  else if (d.pset) { state.print[d.pset] = d.v; pushHistory(); buildPanel(); }
+  else if (d.quick) { const [sz, sh] = d.quick.split('|'); state.print.size = sz; state.print.sheet = sh; if (sz === 'a4mitad' || sz === 'a4cuarto') { state.print.fit = state.print.fit || 'fill'; } pushHistory(); savePrintPref(); buildPanel(); }
+  else if (d.pset) { state.print[d.pset] = d.v; pushHistory(); savePrintPref(); buildPanel(); }
   else if (d.rec) recipeAction('rec', d.rec);
   else if (d.act && d.act.startsWith('rec')) recipeAction(d.act);
   else if (d.act === 'pdf') exportPrint('pdf');
@@ -27500,13 +27503,13 @@ const SIZE_GROUPS = [
   ['Grandes y cuadros', { '24x30': ['24×30', 240, 300], '30x40': ['30×40', 300, 400], '30x45': ['30×45', 300, 450], '40x50': ['40×50', 400, 500], '40x60': ['40×60', 400, 600], '50x70': ['50×70', 500, 700], '60x90': ['60×90', 600, 900] }],
   ['Carnet y documentos', { 'c3x4': ['3×4 carnet', 30, 40, 1], 'c4x4': ['4×4 DNI / pasaporte AR', 40, 40, 1], 'c35x45': ['3,5×4,5 pasaporte', 35, 45, 1], 'c5x5': ['5×5 visa EE. UU.', 51, 51, 1] }],
   ['Cuadradas', { '10x10': ['10×10', 102, 102], '15x15': ['15×15', 150, 150], '20x20': ['20×20', 200, 200], '30x30': ['30×30', 300, 300] }],
-  ['Hojas de papel', { 'A6': ['A6', 105, 148], 'A5': ['A5', 148, 210], 'A4': ['A4', 210, 297], 'A3': ['A3', 297, 420], 'carta': ['Carta', 216, 279], 'oficio': ['Oficio', 216, 356] }],
+  ['Hojas de papel', { 'a4mitad': ['Media A4 (2 en una A4)', 198, 140], 'a4cuarto': ['Cuarto de A4 (4 en una A4)', 98, 140], 'A6': ['A6', 105, 148], 'A5': ['A5', 148, 210], 'A4': ['A4', 210, 297], 'A3': ['A3', 297, 420], 'carta': ['Carta', 216, 279], 'oficio': ['Oficio', 216, 356] }],
   ['Instantáneas', { 'mini': ['Instax Mini', 54, 86, 0, { x: 4, y: 6.5, w: 46, h: 62 }], 'square': ['Instax Square', 72, 86, 0, { x: 5, y: 6.5, w: 62, h: 62 }], 'wide': ['Instax Wide', 108, 86, 0, { x: 4.5, y: 6.5, w: 99, h: 62 }], 'polaroid': ['Polaroid', 88, 107, 0, { x: 4.5, y: 5.5, w: 79, h: 79 }] }],
   ['Otro', { 'custom': ['Personalizado (cm)', 0, 0] }],
 ];
 const SIZES = {};
 SIZE_GROUPS.forEach(([g, o]) => Object.entries(o).forEach(([k, v]) => SIZES[k] = { n: v[0], w: v[1], h: v[2], doc: !!v[3], inst: v[4] || null }));
-const SHEETS = { a4: ['Hoja A4', 210, 297, 6], carta: ['Hoja Carta', 216, 279, 6], oficio: ['Hoja Oficio', 216, 356, 6], a3: ['Hoja A3', 297, 420, 6], p10x15: ['Papel foto 10×15', 102, 152, 3], p13x18: ['Papel foto 13×18', 127, 178, 3], p20x30: ['Papel foto 20×30', 200, 300, 4] };
+const SHEETS = { a4: ['Hoja A4', 210, 297, 5], carta: ['Hoja Carta', 216, 279, 6], oficio: ['Hoja Oficio', 216, 356, 6], a3: ['Hoja A3', 297, 420, 6], p10x15: ['Papel foto 10×15', 102, 152, 3], p13x18: ['Papel foto 13×18', 127, 178, 3], p20x30: ['Papel foto 20×30', 200, 300, 4] };
 function sizeDef(key) {
   const p = state.print; key = key || p.size;
   if (key === 'custom') {
@@ -27529,7 +27532,9 @@ function pxPerMM(w, h) { return Math.min(MM, Math.sqrt(15e6 / (w * h))); } // l�
 function printPanel() {
   const p = state.print, S = sizeDef(), chip = (k, v, l) => `<button class="chip ${p[k] === v ? 'act' : ''}" data-pset="${k}" data-v="${v}">${l}</button>`;
   const inst = !!S.inst;
-  let h = `<div class="grp">Tamaño</div><select class="sel" data-print="size">${SIZE_GROUPS.map(([g, o]) => `<optgroup label="${g}">${Object.keys(o).map(k => `<option value="${k}" ${p.size === k ? 'selected' : ''}>${SIZES[k].n}</option>`).join('')}</optgroup>`).join('')}</select>`;
+  const q = (lbl, size, sheet) => `<button class="chip ${p.size === size && activeSheet() === sheet ? 'act' : ''}" data-quick="${size}|${sheet}">${lbl}</button>`;
+  let h = `<div class="grp">Rápido</div><div class="chips">${q('⭐ 2 en una A4', 'a4mitad', 'a4')}${q('4 en una A4', 'a4cuarto', 'a4')}${q('10×15', '10x15', 'single')}${q('2 de 10×15 en A4', '10x15', 'a4')}${q('Carnet 4×4 en 10×15', 'c4x4', 'p10x15')}</div>`;
+  h += `<div class="grp">Tamaño</div><select class="sel" data-print="size">${SIZE_GROUPS.map(([g, o]) => `<optgroup label="${g}">${Object.keys(o).map(k => `<option value="${k}" ${p.size === k ? 'selected' : ''}>${SIZES[k].n}</option>`).join('')}</optgroup>`).join('')}</select>`;
   if (p.size === 'custom') h += `<div class="row" style="gap:8px;margin-top:8px"><input type="text" inputmode="decimal" data-print="cw" value="${p.cw || '10'}" style="width:80px"> <span>×</span> <input type="text" inputmode="decimal" data-print="ch" value="${p.ch || '15'}" style="width:80px"> <span class="note">cm (ancho × alto)</span></div>`;
   if (S.doc) h += `<p class="note">Foto de documento: se recorta centrada en la cara. Usá fondo blanco o claro (pestaña Fondo → Fondo estudio) si el trámite lo pide.</p>`;
   if (!inst) {
